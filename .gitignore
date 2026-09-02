@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Deck build intermediates (keep the .pptx, not the render scratch)
+deck/*.pdf
+deck/slide-*.jpg
+deck/thumbnails*.jpg
+
+# OS
+.DS_Store

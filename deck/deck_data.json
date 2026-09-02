@@ -1,0 +1,198 @@
+{
+  "n_venues_per_type": 100,
+  "n_venue_types": 4,
+  "balance_sig": 2,
+  "balance_total": 16,
+  "rct": [
+    {
+      "venue_type": "bar",
+      "estimated_lift": 17.88,
+      "ci_low": 13.28,
+      "ci_high": 22.47,
+      "p_value": 0.0,
+      "true_lift_ground_truth": 16.42
+    },
+    {
+      "venue_type": "gym",
+      "estimated_lift": 10.32,
+      "ci_low": 5.24,
+      "ci_high": 15.4,
+      "p_value": 0.0,
+      "true_lift_ground_truth": 10.31
+    },
+    {
+      "venue_type": "restaurant",
+      "estimated_lift": 16.79,
+      "ci_low": 11.13,
+      "ci_high": 22.44,
+      "p_value": 0.0,
+      "true_lift_ground_truth": 13.46
+    },
+    {
+      "venue_type": "waiting_room",
+      "estimated_lift": 7.63,
+      "ci_low": 5.06,
+      "ci_high": 10.2,
+      "p_value": 0.0,
+      "true_lift_ground_truth": 8.08
+    }
+  ],
+  "sc": [
+    {
+      "venue_type": "bar",
+      "estimated_lift": 17.96,
+      "placebo_p_value": 0.1,
+      "avg_pre_period_rmspe": 17.8,
+      "true_lift_ground_truth": 15.82
+    },
+    {
+      "venue_type": "gym",
+      "estimated_lift": 9.92,
+      "placebo_p_value": 0.05,
+      "avg_pre_period_rmspe": 14.4,
+      "true_lift_ground_truth": 9.52
+    },
+    {
+      "venue_type": "restaurant",
+      "estimated_lift": 15.46,
+      "placebo_p_value": 0.16,
+      "avg_pre_period_rmspe": 26.41,
+      "true_lift_ground_truth": 12.17
+    },
+    {
+      "venue_type": "waiting_room",
+      "estimated_lift": 6.53,
+      "placebo_p_value": 0.11,
+      "avg_pre_period_rmspe": 8.32,
+      "true_lift_ground_truth": 7.33
+    }
+  ],
+  "mmm": [
+    {
+      "venue_type": "bar",
+      "beta_naive": 16.25,
+      "beta_calibrated": 19.57,
+      "calibration_adjustment_pct": 20.46,
+      "true_max_lift_ground_truth": 22.0
+    },
+    {
+      "venue_type": "gym",
+      "beta_naive": 4.93,
+      "beta_calibrated": 13.05,
+      "calibration_adjustment_pct": 164.7,
+      "true_max_lift_ground_truth": 14.0
+    },
+    {
+      "venue_type": "restaurant",
+      "beta_naive": 7.97,
+      "beta_calibrated": 18.69,
+      "calibration_adjustment_pct": 134.42,
+      "true_max_lift_ground_truth": 18.0
+    },
+    {
+      "venue_type": "waiting_room",
+      "beta_naive": 4.09,
+      "beta_calibrated": 8.19,
+      "calibration_adjustment_pct": 100.01,
+      "true_max_lift_ground_truth": 9.0
+    }
+  ],
+  "budgets": [
+    {
+      "budget": 20000,
+      "gain_pct": 48.6,
+      "opt_total": 2499.0,
+      "naive_total": 1682.0,
+      "allocation": [
+        {
+          "venue_type": "bar",
+          "allocated_weekly_budget": 0.0,
+          "frequency_per_venue": 0.0,
+          "network_weekly_incremental_foot_traffic": 0.0
+        },
+        {
+          "venue_type": "gym",
+          "allocated_weekly_budget": 6000.0,
+          "frequency_per_venue": 2.0,
+          "network_weekly_incremental_foot_traffic": 506.5
+        },
+        {
+          "venue_type": "restaurant",
+          "allocated_weekly_budget": 10000.0,
+          "frequency_per_venue": 2.5,
+          "network_weekly_incremental_foot_traffic": 1361.3
+        },
+        {
+          "venue_type": "waiting_room",
+          "allocated_weekly_budget": 4050.0,
+          "frequency_per_venue": 2.2,
+          "network_weekly_incremental_foot_traffic": 631.7
+        }
+      ]
+    },
+    {
+      "budget": 50000,
+      "gain_pct": 11.1,
+      "opt_total": 4932.0,
+      "naive_total": 4440.0,
+      "allocation": [
+        {
+          "venue_type": "bar",
+          "allocated_weekly_budget": 19125.0,
+          "frequency_per_venue": 4.2,
+          "network_weekly_incremental_foot_traffic": 1557.8
+        },
+        {
+          "venue_type": "gym",
+          "allocated_weekly_budget": 11250.0,
+          "frequency_per_venue": 3.8,
+          "network_weekly_incremental_foot_traffic": 983.3
+        },
+        {
+          "venue_type": "restaurant",
+          "allocated_weekly_budget": 14000.0,
+          "frequency_per_venue": 3.5,
+          "network_weekly_incremental_foot_traffic": 1645.5
+        },
+        {
+          "venue_type": "waiting_room",
+          "allocated_weekly_budget": 5850.0,
+          "frequency_per_venue": 3.2,
+          "network_weekly_incremental_foot_traffic": 745.6
+        }
+      ]
+    },
+    {
+      "budget": 100000,
+      "gain_pct": 2.4,
+      "opt_total": 5784.0,
+      "naive_total": 5649.0,
+      "allocation": [
+        {
+          "venue_type": "bar",
+          "allocated_weekly_budget": 38250.0,
+          "frequency_per_venue": 8.5,
+          "network_weekly_incremental_foot_traffic": 1896.4
+        },
+        {
+          "venue_type": "gym",
+          "allocated_weekly_budget": 25500.0,
+          "frequency_per_venue": 8.5,
+          "network_weekly_incremental_foot_traffic": 1252.4
+        },
+        {
+          "venue_type": "restaurant",
+          "allocated_weekly_budget": 26000.0,
+          "frequency_per_venue": 6.5,
+          "network_weekly_incremental_foot_traffic": 1830.5
+        },
+        {
+          "venue_type": "waiting_room",
+          "allocated_weekly_budget": 10350.0,
+          "frequency_per_venue": 5.8,
+          "network_weekly_incremental_foot_traffic": 804.6
+        }
+      ]
+    }
+  ]
+}

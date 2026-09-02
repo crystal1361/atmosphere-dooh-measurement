@@ -1,0 +1,35 @@
+{
+  "rng_seed": 20260902,
+  "n_weeks_pre": 52,
+  "n_weeks_campaign": 52,
+  "rct_campaign_start_week_offset": 8,
+  "rct_campaign_weeks": 10,
+  "rct_frequency": 6.0,
+  "venue_type_params": {
+    "restaurant": {
+      "max_lift": 18.0,
+      "adstock_decay": 0.35,
+      "sat_half": 5.0,
+      "sat_shape": 2.0
+    },
+    "gym": {
+      "max_lift": 14.0,
+      "adstock_decay": 0.55,
+      "sat_half": 7.0,
+      "sat_shape": 2.2
+    },
+    "bar": {
+      "max_lift": 22.0,
+      "adstock_decay": 0.2,
+      "sat_half": 4.0,
+      "sat_shape": 1.8
+    },
+    "waiting_room": {
+      "max_lift": 9.0,
+      "adstock_decay": 0.45,
+      "sat_half": 4.0,
+      "sat_shape": 2.5
+    }
+  },
+  "note": "Synthetic ground truth for validation only. true_incremental_lift in weekly_panel.csv is the exact answer each downstream causal/MMM method is being scored against; it would not be observable in a real deployment."
+}
