@@ -194,5 +194,92 @@
         }
       ]
     }
-  ]
+  ],
+  "phase2": {
+    "r2_test": 0.84,
+    "mae_test": 44.6,
+    "mape_test": 22.1,
+    "potential_corr": 0.945,
+    "prospect_potential_corr": 0.946,
+    "n_flagged": 20,
+    "flagged_latent_gap_rate": 90.0,
+    "population_latent_gap_rate": 27.8,
+    "top_features": [
+      {
+        "feature": "baseline_level",
+        "importance": 0.813
+      },
+      {
+        "feature": "geo_cluster",
+        "importance": 0.269
+      },
+      {
+        "feature": "audience_quality",
+        "importance": 0.142
+      },
+      {
+        "feature": "dwell_time_min",
+        "importance": 0.075
+      }
+    ],
+    "top_flags": [
+      {
+        "venue_id": 85,
+        "venue_type": "restaurant",
+        "gap_pct": -61.8
+      },
+      {
+        "venue_id": 309,
+        "venue_type": "waiting_room",
+        "gap_pct": -60.6
+      },
+      {
+        "venue_id": 53,
+        "venue_type": "restaurant",
+        "gap_pct": -60.5
+      },
+      {
+        "venue_id": 247,
+        "venue_type": "bar",
+        "gap_pct": -60.1
+      },
+      {
+        "venue_id": 288,
+        "venue_type": "bar",
+        "gap_pct": -54.1
+      }
+    ],
+    "top_prospects": [
+      {
+        "prospect_id": "P0018",
+        "venue_type": "bar",
+        "in_expansion_market": false,
+        "predicted_revenue": 684.0
+      },
+      {
+        "prospect_id": "P0055",
+        "venue_type": "restaurant",
+        "in_expansion_market": false,
+        "predicted_revenue": 524.0
+      },
+      {
+        "prospect_id": "P0000",
+        "venue_type": "bar",
+        "in_expansion_market": true,
+        "predicted_revenue": 500.0
+      },
+      {
+        "prospect_id": "P0001",
+        "venue_type": "bar",
+        "in_expansion_market": true,
+        "predicted_revenue": 496.0
+      },
+      {
+        "prospect_id": "P0040",
+        "venue_type": "restaurant",
+        "in_expansion_market": true,
+        "predicted_revenue": 492.0
+      }
+    ]
+  }
 }

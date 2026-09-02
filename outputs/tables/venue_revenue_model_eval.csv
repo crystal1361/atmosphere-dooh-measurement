@@ -1,0 +1,2 @@
+r2_test,mae_test,mape_test,n_train,n_test,predicted_vs_true_potential_corr,prospect_predicted_vs_true_potential_corr,flagged_venues,flagged_latent_gap_rate,population_latent_gap_rate,gap_pct_vs_monetization_efficiency_corr,gap_pct_vs_thin_coverage_market_corr,gap_pct_vs_individual_execution_gap_corr
+0.8401399771602154,44.616760553658516,0.22128668208943816,280,120,0.9454114895099203,0.9456332637878789,20,0.9,0.2775,-0.06365742558682454,0.11917285102186889,-0.021030600500683755

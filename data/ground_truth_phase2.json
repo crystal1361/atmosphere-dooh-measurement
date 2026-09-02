@@ -1,0 +1,22 @@
+{
+  "rng_seed": 20260903,
+  "thin_coverage_geos": [
+    0,
+    3,
+    4
+  ],
+  "expansion_geo_ids": [
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "base_weekly_ad_rate": {
+    "restaurant": 380.0,
+    "gym": 300.0,
+    "bar": 420.0,
+    "waiting_room": 150.0
+  },
+  "note": "true_ad_revenue_potential and monetization_efficiency (incl. thin_coverage_market / individual_execution_gap flags) are latent ground truth for validating venue_revenue_model.py's out-of-sample recovery only -- the model itself is never given these columns."
+}

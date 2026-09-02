@@ -60,10 +60,17 @@ def load_all():
     mmm_params = pd.read_csv(os.path.join(OUT_TABLES, "mmm_params.csv"))
     mmm_curves = pd.read_csv(os.path.join(OUT_TABLES, "mmm_response_curves.csv"))
     sc_curves = np.load(os.path.join(OUT_TABLES, "sc_example_curves.npy"), allow_pickle=True).item()
-    return venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves
+    revenue_eval = pd.read_csv(os.path.join(OUT_TABLES, "venue_revenue_model_eval.csv"))
+    revenue_calib = pd.read_csv(os.path.join(OUT_TABLES, "venue_revenue_calibration.csv"))
+    revenue_importance = pd.read_csv(os.path.join(OUT_TABLES, "venue_revenue_feature_importance.csv"))
+    revenue_flags = pd.read_csv(os.path.join(OUT_TABLES, "venue_underperformance_flags.csv"))
+    prospect_ranking = pd.read_csv(os.path.join(OUT_TABLES, "prospect_ranking.csv"))
+    return (venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves,
+            revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking)
 
 
-venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves = load_all()
+(venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves,
+ revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking) = load_all()
 
 st.title("Atmosphere TV — DOOH Venue Incrementality & Media-Mix Measurement")
 st.caption(
@@ -72,8 +79,8 @@ st.caption(
     "actually recovers it before trusting it conceptually."
 )
 
-tab_overview, tab_causal, tab_mmm, tab_budget = st.tabs(
-    ["Overview", "Causal Measurement", "Media-Mix Model", "Budget Allocator"]
+tab_overview, tab_causal, tab_mmm, tab_budget, tab_revenue = st.tabs(
+    ["Overview", "Causal Measurement", "Media-Mix Model", "Budget Allocator", "Venue Revenue & Expansion"]
 )
 
 # ---------------------------------------------------------------------------
@@ -81,7 +88,7 @@ tab_overview, tab_causal, tab_mmm, tab_budget = st.tabs(
 # ---------------------------------------------------------------------------
 with tab_overview:
     st.subheader("What this answers")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(
             "**Advertiser-facing (sell-side differentiator):**\n\n"
@@ -97,6 +104,14 @@ with tab_overview:
             "(restaurants / gyms / bars / waiting rooms) to maximize incremental "
             "foot traffic, accounting for each venue type's own diminishing-returns "
             "curve?"
+        )
+    with col3:
+        st.markdown(
+            "**Atmosphere's own revenue (Phase 2, buy-side of the network):**\n\n"
+            "Beyond the advertiser's questions, what should Atmosphere itself do — "
+            "which existing venues are under-monetized relative to their own traffic "
+            "and quality, and which prospective venues are worth prioritizing for "
+            "network expansion?"
         )
 
     st.divider()
@@ -115,7 +130,12 @@ with tab_overview:
         "- **Budget allocator**: an exact DP (multiple-choice knapsack) over the "
         "calibrated response curves — not a greedy walk, because these S-shaped curves "
         "are not globally concave and a greedy heuristic measurably underperformed a "
-        "naive baseline in an earlier version of this tool."
+        "naive baseline in an earlier version of this tool.\n"
+        "- **Venue revenue model (Phase 2)**: a gradient-boosted-trees model predicts "
+        "each venue's realized ad revenue from observable characteristics plus Phase 1's "
+        "RCT-calibrated per-exposure lift as a feature — connecting the two phases rather "
+        "than treating them as separate silos. Out-of-fold residuals flag under-monetized "
+        "existing venues; the same model scores prospective venues for expansion priority."
     )
 
     st.divider()
@@ -129,7 +149,11 @@ with tab_overview:
         "ambient-screen exposure model has no individual-level, cross-venue touchpoint "
         "log by default — that would require purchased mobile location/device-matching "
         "data, which isn't assumed here. Rather than force a model onto a data structure "
-        "that doesn't exist, this project scopes MTA out and names why."
+        "that doesn't exist, this project scopes MTA out and names why.\n"
+        "- **Phase 2's revenue figures are synthetic**, generated with a known injected "
+        "ad-rate-card, market-demand, and monetization-efficiency structure — same "
+        "validate-before-trust pattern as Phase 1, not a claim about Atmosphere's real "
+        "rate card or actual venue economics."
     )
 
 # ---------------------------------------------------------------------------
@@ -322,3 +346,106 @@ with tab_budget:
     ax4.set_ylabel("Allocated weekly budget ($)")
     ax4.set_title(f"Optimized allocation of ${budget:,} across venue types")
     st.pyplot(fig4)
+
+# ---------------------------------------------------------------------------
+# TAB 5: Venue Revenue & Expansion (Phase 2)
+# ---------------------------------------------------------------------------
+with tab_revenue:
+    ev = revenue_eval.iloc[0]
+    st.subheader("Predicting realized ad revenue from venue characteristics")
+    st.caption(
+        "A gradient-boosted-trees model (venue_type, geo_cluster, traffic tier, baseline "
+        "traffic, screen count, dwell time, audience quality, plus Phase 1's RCT-calibrated "
+        "per-exposure lift as a feature) predicts each venue's realized weekly ad revenue. "
+        "Two uses: flag existing venues under-monetized relative to peers, and rank "
+        "prospective venues for network expansion."
+    )
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Held-out R²", f"{ev['r2_test']:.2f}")
+    m2.metric("Held-out MAE", f"${ev['mae_test']:,.0f}/wk")
+    m3.metric("Held-out MAPE", f"{ev['mape_test']*100:.1f}%")
+    m4.metric("Corr. w/ latent true potential", f"{ev['predicted_vs_true_potential_corr']:.2f}")
+    st.caption(
+        "The last figure is a validation-only check: this synthetic demo injects a latent "
+        "'true revenue potential' the model is never trained on, purely to confirm the model "
+        "recovers it despite training only on noisy realized revenue — same ground-truth-"
+        "first discipline as Phase 1's causal methods."
+    )
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown("**Calibration: predicted vs. actual, by predicted-revenue quintile (test set)**")
+        fig5, ax5 = plt.subplots(figsize=(5.5, 3.5))
+        ax5.plot(revenue_calib["decile"], revenue_calib["predicted_mean"], marker="o",
+                 label="Predicted", color="#4C72B0")
+        ax5.plot(revenue_calib["decile"], revenue_calib["actual_mean"], marker="o",
+                 label="Actual", color="#C44E52")
+        ax5.set_xlabel("Predicted-revenue quintile")
+        ax5.set_ylabel("Mean weekly ad revenue ($)")
+        ax5.legend(fontsize=8)
+        st.pyplot(fig5)
+    with col_b:
+        st.markdown("**Feature importance (permutation, held-out test set)**")
+        fig6, ax6 = plt.subplots(figsize=(5.5, 3.5))
+        imp = revenue_importance.sort_values("importance_mean")
+        ax6.barh(imp["feature"], imp["importance_mean"], color="#55A868")
+        ax6.set_xlabel("Mean R² drop when permuted")
+        st.pyplot(fig6)
+        st.caption(
+            "Phase 1's calibrated-lift feature carries near-zero importance here — an honest, "
+            "expected result: it's constant within venue_type, so it can only ever be a weak, "
+            "secondary signal once venue_type itself is already a feature."
+        )
+
+    st.divider()
+    st.subheader("Under-monetized existing venues")
+    st.caption(
+        f"Flags use 5-fold out-of-fold predictions (no venue is ever scored by a model that saw "
+        f"its own revenue). The {int(ev['flagged_venues'])} most under-monetized venues carry a "
+        f"{ev['flagged_latent_gap_rate']*100:.0f}% latent under-monetization rate "
+        f"(thin sales-coverage market or venue-level execution gap) vs. a "
+        f"{ev['population_latent_gap_rate']*100:.0f}% rate network-wide — strong enrichment in the "
+        "flagged tail, even though gap_pct correlates only weakly with latent efficiency across "
+        "the full population (most of that variation is noise; the flagged tail is where the "
+        "latent mechanisms actually dominate)."
+    )
+    flags_display = revenue_flags.copy()
+    flags_display["venue_type"] = flags_display["venue_type"].map(VENUE_TYPE_LABELS)
+    st.dataframe(
+        flags_display[["venue_id", "venue_type", "geo_cluster", "realized_ad_revenue",
+                        "predicted_revenue_oof", "gap_pct", "thin_coverage_market",
+                        "individual_execution_gap"]]
+        .rename(columns={
+            "venue_id": "Venue ID", "venue_type": "Venue type", "geo_cluster": "Geo cluster",
+            "realized_ad_revenue": "Realized revenue ($/wk)", "predicted_revenue_oof": "Predicted ($/wk, OOF)",
+            "gap_pct": "Gap (%)", "thin_coverage_market": "Thin-coverage market (latent)",
+            "individual_execution_gap": "Execution gap (latent)",
+        })
+        .style.format({"Realized revenue ($/wk)": "${:,.0f}", "Predicted ($/wk, OOF)": "${:,.0f}",
+                        "Gap (%)": "{:+.1f}%"}),
+        width='stretch',
+    )
+
+    st.divider()
+    st.subheader("Prospective venues — expansion priority ranking")
+    st.caption(
+        "Scored by the same model (refit on all existing venues) on characteristics a "
+        "scouting/leasing team could observe before signing — no revenue history required. "
+        f"Predicted ranking correlates {ev['prospect_predicted_vs_true_potential_corr']:.2f} with "
+        "these prospects' latent true potential (validation-only check, same as above)."
+    )
+    n_top = st.slider("Show top N prospects", min_value=5, max_value=40, value=15, step=5)
+    prospect_display = prospect_ranking.head(n_top).copy()
+    prospect_display["venue_type"] = prospect_display["venue_type"].map(VENUE_TYPE_LABELS)
+    st.dataframe(
+        prospect_display[["prospect_id", "venue_type", "geo_cluster", "in_expansion_market",
+                           "predicted_revenue", "rank_overall"]]
+        .rename(columns={
+            "prospect_id": "Prospect ID", "venue_type": "Venue type", "geo_cluster": "Geo cluster",
+            "in_expansion_market": "New expansion market", "predicted_revenue": "Predicted revenue ($/wk)",
+            "rank_overall": "Overall rank",
+        })
+        .style.format({"Predicted revenue ($/wk)": "${:,.0f}"}),
+        width='stretch',
+    )
