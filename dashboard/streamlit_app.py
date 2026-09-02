@@ -107,7 +107,7 @@ with tab_overview:
         )
     with col3:
         st.markdown(
-            "**Atmosphere's own revenue (Phase 2, buy-side of the network):**\n\n"
+            "**Atmosphere's own revenue (buy-side of the network):**\n\n"
             "Beyond the advertiser's questions, what should Atmosphere itself do — "
             "which existing venues are under-monetized relative to their own traffic "
             "and quality, and which prospective venues are worth prioritizing for "
@@ -131,10 +131,10 @@ with tab_overview:
         "calibrated response curves — not a greedy walk, because these S-shaped curves "
         "are not globally concave and a greedy heuristic measurably underperformed a "
         "naive baseline in an earlier version of this tool.\n"
-        "- **Venue revenue model (Phase 2)**: a gradient-boosted-trees model predicts "
-        "each venue's realized ad revenue from observable characteristics plus Phase 1's "
-        "RCT-calibrated per-exposure lift as a feature — connecting the two phases rather "
-        "than treating them as separate silos. Out-of-fold residuals flag under-monetized "
+        "- **Venue revenue model**: a gradient-boosted-trees model predicts each venue's "
+        "realized ad revenue from observable characteristics plus the RCT-calibrated "
+        "per-exposure lift from the causal/MMM pipeline as a feature — one connected "
+        "pipeline, not a separate silo. Out-of-fold residuals flag under-monetized "
         "existing venues; the same model scores prospective venues for expansion priority."
     )
 
@@ -150,10 +150,10 @@ with tab_overview:
         "log by default — that would require purchased mobile location/device-matching "
         "data, which isn't assumed here. Rather than force a model onto a data structure "
         "that doesn't exist, this project scopes MTA out and names why.\n"
-        "- **Phase 2's revenue figures are synthetic**, generated with a known injected "
+        "- **The venue-revenue figures are synthetic**, generated with a known injected "
         "ad-rate-card, market-demand, and monetization-efficiency structure — same "
-        "validate-before-trust pattern as Phase 1, not a claim about Atmosphere's real "
-        "rate card or actual venue economics."
+        "validate-before-trust pattern used throughout, not a claim about Atmosphere's "
+        "real rate card or actual venue economics."
     )
 
 # ---------------------------------------------------------------------------
@@ -348,14 +348,14 @@ with tab_budget:
     st.pyplot(fig4)
 
 # ---------------------------------------------------------------------------
-# TAB 5: Venue Revenue & Expansion (Phase 2)
+# TAB 5: Venue Revenue & Expansion
 # ---------------------------------------------------------------------------
 with tab_revenue:
     ev = revenue_eval.iloc[0]
     st.subheader("Predicting realized ad revenue from venue characteristics")
     st.caption(
         "A gradient-boosted-trees model (venue_type, geo_cluster, traffic tier, baseline "
-        "traffic, screen count, dwell time, audience quality, plus Phase 1's RCT-calibrated "
+        "traffic, screen count, dwell time, audience quality, plus the RCT-calibrated "
         "per-exposure lift as a feature) predicts each venue's realized weekly ad revenue. "
         "Two uses: flag existing venues under-monetized relative to peers, and rank "
         "prospective venues for network expansion."
@@ -370,7 +370,7 @@ with tab_revenue:
         "The last figure is a validation-only check: this synthetic demo injects a latent "
         "'true revenue potential' the model is never trained on, purely to confirm the model "
         "recovers it despite training only on noisy realized revenue — same ground-truth-"
-        "first discipline as Phase 1's causal methods."
+        "first discipline used throughout this project."
     )
 
     col_a, col_b = st.columns(2)
@@ -393,7 +393,7 @@ with tab_revenue:
         ax6.set_xlabel("Mean R² drop when permuted")
         st.pyplot(fig6)
         st.caption(
-            "Phase 1's calibrated-lift feature carries near-zero importance here — an honest, "
+            "The calibrated-lift feature carries near-zero importance here — an honest, "
             "expected result: it's constant within venue_type, so it can only ever be a weak, "
             "secondary signal once venue_type itself is already a feature."
         )

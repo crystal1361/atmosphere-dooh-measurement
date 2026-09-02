@@ -8,14 +8,36 @@ questions Atmosphere's business runs on:
 2. **How should budget be spent?** — given a fixed weekly budget, how should it be split
    across venue types (restaurants / gyms / bars / waiting rooms), accounting for each
    type's own diminishing-returns curve?
-3. **Where's Atmosphere's own revenue upside?** (Phase 2) — which existing venues are
-   under-monetized relative to their own traffic and quality, and which prospective venues
-   are worth prioritizing for network expansion?
+3. **Where's Atmosphere's own revenue upside?** — which existing venues are under-monetized
+   relative to their own traffic and quality, and which prospective venues are worth
+   prioritizing for network expansion?
 
 > **This is a synthetic demo, not a claim about Atmosphere's real data or production
-> systems.** Every dataset here — Phase 1 and Phase 2 — is generated with a *known,
-> injected ground-truth effect* — see [Honest scope](#honest-scope) — specifically so each
-> method below can be validated against a known answer before being trusted conceptually.
+> systems.** Every dataset here is generated with a *known, injected ground-truth effect*
+> — see [Honest scope](#honest-scope) — specifically so each method below can be validated
+> against a known answer before being trusted conceptually.
+
+## Slides
+
+The full presentation, viewable right here — no download needed. (Editable source:
+[`AtmosphereTV_DOOH_Measurement.pptx`](deck/AtmosphereTV_DOOH_Measurement.pptx); a
+[PDF](deck/AtmosphereTV_DOOH_Measurement.pdf) is also included, which GitHub opens inline
+in-browser if you'd rather page through it there.)
+
+<p align="center">
+<img src="deck/slides/slide-01.jpg" width="800"><br>
+<img src="deck/slides/slide-02.jpg" width="800"><br>
+<img src="deck/slides/slide-03.jpg" width="800"><br>
+<img src="deck/slides/slide-04.jpg" width="800"><br>
+<img src="deck/slides/slide-05.jpg" width="800"><br>
+<img src="deck/slides/slide-06.jpg" width="800"><br>
+<img src="deck/slides/slide-07.jpg" width="800"><br>
+<img src="deck/slides/slide-08.jpg" width="800"><br>
+<img src="deck/slides/slide-09.jpg" width="800"><br>
+<img src="deck/slides/slide-10.jpg" width="800"><br>
+<img src="deck/slides/slide-11.jpg" width="800"><br>
+<img src="deck/slides/slide-12.jpg" width="800">
+</p>
 
 ## Design
 
@@ -28,7 +50,7 @@ into the models that scale it across the whole network:
 | 2 | **Synthetic control** | Moderate | Covers historical, non-randomized campaigns where advertisers self-selected which venues to activate. Validated with pre-period fit quality (RMSPE) and an in-space placebo test — synthetic control has no closed-form standard error. |
 | 3 | **Media-mix model (MMM)** | Shape from data, scale from RCT | Adstock + saturation curves fit on the aggregate weekly exposure series are not causally identified on their own — the RCT's point estimate is used to *calibrate* the model's scale, while its shape (decay, saturation) comes from the richer aggregate series. |
 | 4 | **Budget allocator** | Exact DP | An exact dynamic-programming (multiple-choice knapsack) solve over the calibrated response curves — **not** a greedy marginal-value walk. A Hill/S-shaped response curve is convex before its inflection point, so a greedy heuristic isn't guaranteed optimal; an earlier greedy version of this allocator measurably underperformed a naive equal-split baseline. The DP has no concavity requirement and is guaranteed to find the grid-optimal allocation. |
-| 5 | **Venue revenue model (Phase 2)** | GBT, honest OOF | A gradient-boosted-trees model predicts each venue's realized ad revenue from observable characteristics *plus Phase 1's RCT-calibrated per-exposure lift as a feature* — connecting the two phases rather than treating them as separate projects. 5-fold out-of-fold predictions (never a model scoring the venue it was trained on) power under-monetization flags on existing venues; the same model, refit on all existing venues, scores never-before-seen prospects for expansion priority. |
+| 5 | **Venue revenue model** | GBT, honest OOF | A gradient-boosted-trees model predicts each venue's realized ad revenue from observable characteristics *plus the RCT-calibrated per-exposure lift from stage 1–3 as a feature* — one connected pipeline, not a separate project bolted on. 5-fold out-of-fold predictions (never a model scoring the venue it was trained on) power under-monetization flags on existing venues; the same model, refit on all existing venues, scores never-before-seen prospects for expansion priority. |
 
 ## Key results (synthetic, see `outputs/tables/`)
 
@@ -43,7 +65,7 @@ into the models that scale it across the whole network:
   **+48.6%** at a $20K weekly budget, narrowing to +2.4% at $100K — the optimizer's edge
   is largest exactly when budget is scarce and allocation decisions matter most
   (`src/budget_allocator.py`).
-- **Venue revenue model (Phase 2)**: held-out R² = **0.84**, MAPE = **22.1%**, and —
+- **Venue revenue model**: held-out R² = **0.84**, MAPE = **22.1%**, and —
   since this is synthetic data with an injected latent "true potential" the model never
   sees — predictions correlate **0.95** with that latent ground truth on both existing
   and never-before-seen prospect venues (`outputs/tables/venue_revenue_model_eval.csv`).
@@ -61,10 +83,10 @@ src/
   causal_synthetic_control.py  # synthetic control: donor weighting + placebo test
   mmm_model.py                  # adstock/saturation MMM + RCT calibration
   budget_allocator.py           # exact DP budget allocation across venue types
-  venue_economics_data.py       # Phase 2: synthetic venue revenue economics + prospects
-  venue_revenue_model.py        # Phase 2: GBT revenue model, OOF flags, prospect ranking
+  venue_economics_data.py       # synthetic venue revenue economics + prospect venues
+  venue_revenue_model.py        # GBT revenue model, OOF under-monetization flags, prospect ranking
 data/                          # generated venues.csv, weekly_panel.csv, ground_truth.json,
-                                # venue_economics.csv, prospect_venues.csv, ground_truth_phase2.json
+                                # venue_economics.csv, prospect_venues.csv, venue_economics_ground_truth.json
 outputs/tables/                # every script's output tables (effect estimates, params)
 outputs/figures/               # (reserved for exported static figures)
 dashboard/
@@ -72,7 +94,9 @@ dashboard/
 deck/
   build_deck.js                  # pptxgenjs script that builds the presentation deck
   deck_data.json                 # numbers pulled from outputs/tables/ for the deck
-  AtmosphereTV_DOOH_Measurement.pptx
+  AtmosphereTV_DOOH_Measurement.pptx  # editable source
+  AtmosphereTV_DOOH_Measurement.pdf   # same deck, opens inline in GitHub's file viewer
+  slides/                         # per-slide .jpg renders, embedded in this README
 ```
 
 ## Running it
@@ -85,25 +109,26 @@ python3 src/causal_rct.py                  # 2. RCT geo-holdout effects (high co
 python3 src/causal_synthetic_control.py    # 3. synthetic control effects (moderate confidence)
 python3 src/mmm_model.py                    # 4. MMM, calibrated against the RCT
 python3 src/budget_allocator.py             # 5. budget allocation examples (CLI)
-python3 src/venue_economics_data.py         # 6. Phase 2: synthetic venue revenue economics
-python3 src/venue_revenue_model.py          # 7. Phase 2: revenue model, flags, prospect ranking
+python3 src/venue_economics_data.py         # 6. synthetic venue revenue economics + prospects
+python3 src/venue_revenue_model.py          # 7. venue revenue model, OOF flags, prospect ranking
 
-streamlit run dashboard/streamlit_app.py    # interactive dashboard (5 tabs, incl. Phase 2)
+streamlit run dashboard/streamlit_app.py    # interactive dashboard (5 tabs)
 ```
 
-## Phase 2: the other side of the business
+## Venue revenue: the other side of the business
 
-Phase 1 above answers the *advertising* side — proving and pricing incrementality, which
-feeds Atmosphere's go-to-market motion as a sell-side differentiator. Phase 2 answers
-Atmosphere's other growth lever, its *venue network*: which existing venues are
+The pipeline above answers the *advertising* side — proving and pricing incrementality,
+which feeds Atmosphere's go-to-market motion as a sell-side differentiator. This part
+answers Atmosphere's other growth lever, its *venue network*: which existing venues are
 under-monetized relative to their own traffic and quality, and which prospective venues
 are worth prioritizing for expansion.
 
 **Design**: a gradient-boosted-trees model (`HistGradientBoostingRegressor`) predicts each
 venue's realized weekly ad revenue from observable characteristics (venue_type,
 geo_cluster, traffic tier, baseline traffic, screen count, dwell time, audience quality)
-plus Phase 1's RCT-calibrated per-exposure lift as a feature — the connective tissue
-between the two phases. Two uses of the same model:
+plus the RCT-calibrated per-exposure lift from the causal/MMM pipeline as a feature — the
+connective tissue that keeps this one pipeline, not two disconnected projects. Two uses of
+the same model:
 
 - **Under-monetization flags** on existing venues, from 5-fold *out-of-fold* predictions
   (no venue is ever scored by a model that saw its own revenue) — surfacing venues worth a
@@ -112,7 +137,7 @@ between the two phases. Two uses of the same model:
   characteristics a scouting/leasing team could observe pre-signature (no revenue history
   needed), using the same model refit on all existing venues.
 
-**Validation, same ground-truth-first discipline as Phase 1**: this synthetic demo injects
+**Validation, same ground-truth-first discipline used throughout**: this synthetic demo injects
 a latent "true ad-revenue potential" (driven by traffic, inventory, audience quality, and
 a latent per-geo advertiser-demand multiplier) and a latent "monetization efficiency"
 (a few structurally under-covered geo markets, plus independent venue-level execution
@@ -128,12 +153,13 @@ absolute efficiency).
 
 ## Honest scope
 
-- **All data is synthetic** — Phase 1 and Phase 2 — generated with a known injected
-  ground-truth effect used to validate that each method recovers it. Not a claim about any
-  real company's data or systems.
-- **Phase 2's rate card, demand multipliers, and monetization-efficiency structure are
-  illustrative demo parameters** (`BASE_WEEKLY_AD_RATE` in `src/venue_economics_data.py`),
-  not a researched real Atmosphere rate card or actual venue economics.
+- **All data is synthetic**, generated with a known injected ground-truth effect used to
+  validate that each method recovers it. Not a claim about any real company's data or
+  systems.
+- **The venue-revenue model's rate card, demand multipliers, and monetization-efficiency
+  structure are illustrative demo parameters** (`BASE_WEEKLY_AD_RATE` in
+  `src/venue_economics_data.py`), not a researched real Atmosphere rate card or actual
+  venue economics.
 - **The under-monetization residual is a tail-enrichment signal, not a population-wide
   linear one** — worth naming plainly rather than glossing over: across all 400 venues,
   `gap_pct` correlates only weakly with the latent monetization-efficiency draw (most

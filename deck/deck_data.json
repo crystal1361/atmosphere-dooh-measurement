@@ -195,7 +195,7 @@
       ]
     }
   ],
-  "phase2": {
+  "venue_revenue": {
     "r2_test": 0.84,
     "mae_test": 44.6,
     "mape_test": 22.1,

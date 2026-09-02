@@ -94,7 +94,7 @@ function addFooter(slide, pageLabel) {
     },
     {
       x: 0.6 + 2 * (cardW + gap), num: "3", title: "Where's Atmosphere's own revenue upside?",
-      body: "Which existing venues are under-monetized relative to their own traffic and quality — and which prospective venues are worth prioritizing for network expansion?\n\nPhase 2: Atmosphere's own buy-side question, not the advertiser's.",
+      body: "Which existing venues are under-monetized relative to their own traffic and quality — and which prospective venues are worth prioritizing for network expansion?\n\nAtmosphere's own buy-side question, not the advertiser's.",
     },
   ];
   cards.forEach((c) => {
@@ -377,23 +377,23 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 9 — Phase 1 -> Phase 2: the other side of the business
+// Slide 9 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: NAVY_DARK };
   slide.addText("The other side of the business", { x: 0.6, y: 0.5, w: 12, h: 0.7, fontSize: 28, bold: true, color: WHITE, fontFace: "Cambria" });
-  slide.addText("Phase 1 answers the advertising side. Phase 2 answers the venue-network side — both built, one connected system.", {
+  slide.addText("One system answers the advertising side. The same system answers the venue-network side too.", {
     x: 0.6, y: 1.2, w: 12, h: 0.45, fontSize: 13.5, italic: true, color: ICE, fontFace: "Calibri",
   });
 
   const colW = 5.7, y0 = 1.85, h0 = 4.75, gap = 0.5;
-  const p1 = { x: 0.6, title: "Phase 1 — Advertising incrementality", items: [
+  const p1 = { x: 0.6, title: "Advertising incrementality", items: [
     "Prove and price advertising incrementality",
     "Feeds go-to-market: sell-side differentiator, client trust",
     "RCT + synthetic control + calibrated MMM + budget DP",
   ]};
-  const p2 = { x: 0.6 + colW + gap, title: "Phase 2 — Venue economics", items: [
+  const p2 = { x: 0.6 + colW + gap, title: "Venue economics", items: [
     "Predict a venue's realized ad-revenue from its characteristics",
     "Flag under-monetized existing venues for sales/ops follow-up",
     "Rank prospective venues for expansion priority",
@@ -412,29 +412,29 @@ function addFooter(slide, pageLabel) {
     });
     if (idx === 0) {
       slide.addText(
-        "Feeds Phase 2 as a validated causal-value input (calibrated per-exposure lift), not a separate silo.",
+        "Feeds the venue-economics model as a validated causal-value input (calibrated per-exposure lift), not a separate silo.",
         { x: p.x + 0.4, y: y0 + h0 - 0.65, w: colW - 0.8, h: 0.55, fontSize: 10, italic: true, color: ICE, fontFace: "Calibri", lineSpacing: 13 }
       );
     }
   });
   slide.addText(
-    "“Smarter on both sides of the business” — the venue-side model shares its data foundation and Phase 1's causal-value input, rather than being a disconnected second project. Results on the next slide.",
+    "“Smarter on both sides of the business” — the venue-side model shares its data foundation and causal-value input with the advertising side, rather than being a disconnected second project. Results on the next slide.",
     { x: 0.6, y: 6.85, w: 12, h: 0.5, fontSize: 11.5, italic: true, color: ICE, fontFace: "Calibri" }
   );
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — Phase 2 results: venue revenue model
+// Slide 10 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Phase 2: predicting venue ad-revenue, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
-  slide.addText("Gradient-boosted trees on observable venue characteristics + Phase 1's calibrated per-exposure lift as a feature.", {
+  slide.addText("Predicting venue ad-revenue, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Gradient-boosted trees on observable venue characteristics + the calibrated per-exposure lift as a feature.", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
-  const p2 = DATA.phase2;
+  const p2 = DATA.venue_revenue;
   const metricY = 1.65;
   const metrics = [
     { label: "Held-out R²", value: p2.r2_test.toFixed(2) },
@@ -483,10 +483,10 @@ function addFooter(slide, pageLabel) {
   });
 
   slide.addText(
-    "Flags come from 5-fold out-of-fold predictions, never a model scoring the venue it was trained on. Phase 1's calibrated-lift feature carries near-zero importance — honest, since it's constant within venue_type once venue_type itself is a feature.",
+    "Flags come from 5-fold out-of-fold predictions, never a model scoring the venue it was trained on. The calibrated-lift feature carries near-zero importance — honest, since it's constant within venue_type once venue_type itself is a feature.",
     { x: 0.6, y: 6.65, w: 12.1, h: 0.45, fontSize: 10, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
   );
-  addFooter(slide, "Venue economics — Phase 2");
+  addFooter(slide, "Venue economics");
 }
 
 // ---------------------------------------------------------------------------
@@ -498,10 +498,10 @@ function addFooter(slide, pageLabel) {
   slide.addText("Honest scope", { x: 0.6, y: 0.5, w: 8, h: 0.7, fontSize: 30, bold: true, color: NAVY, fontFace: "Cambria" });
 
   const rows = [
-    { label: "Synthetic data", body: "All figures — Phase 1 and Phase 2 — are synthetic, with a known injected ground-truth effect used specifically to validate that each method recovers it before trusting it conceptually. Not a claim about any real company's data." },
+    { label: "Synthetic data", body: "Every figure in this project is synthetic, with a known injected ground-truth effect used specifically to validate that each method recovers it before trusting it conceptually. Not a claim about any real company's data." },
     { label: "Media-effectiveness & rate-card figures", body: "Dwell time, screen count, ad rate card, and similar parameters shown are illustrative demo values, not researched real industry benchmarks. In production: Nielsen OOH, DSP data (e.g. Vistar), or Atmosphere's own play logs and rate card." },
     { label: "Multi-touch attribution — deliberately not built", body: "Atmosphere's ambient-screen model has no individual-level, cross-venue touchpoint log by default. Building MTA would require purchased mobile location/device-matching data — a real but non-default assumption, so it's scoped out rather than forced." },
-    { label: "Cost & revenue assumptions", body: "The $/frequency-unit figures behind the budget allocator, and the ad-rate-card behind Phase 2's revenue model, are illustrative, editable placeholders — in production these come from Atmosphere's own rate card by venue type and daypart." },
+    { label: "Cost & revenue assumptions", body: "The $/frequency-unit figures behind the budget allocator, and the ad-rate-card behind the venue-revenue model, are illustrative, editable placeholders — in production these come from Atmosphere's own rate card by venue type and daypart." },
   ];
   let y = 1.5;
   rows.forEach((r) => {
@@ -525,7 +525,7 @@ function addFooter(slide, pageLabel) {
     "Match the method to the assignment mechanism — RCT where randomization is designed, synthetic control where it isn't, each with its own validation check.",
     "An uncalibrated MMM understated true incremental value by up to 165% here — experiment calibration isn't optional polish, it's the identification fix.",
     "Optimization needs the right algorithm for the curve's shape — a greedy heuristic silently lost to a naive baseline on non-concave response curves; the exact DP formulation doesn't.",
-    "One connected system, not two projects: Phase 2's venue-revenue model reuses Phase 1's causal-value input, recovers latent ground truth at 0.95 correlation, and cleanly separates market-level effects from venue-level execution gaps.",
+    "One connected system, not two projects: the venue-revenue model reuses the causal pipeline's per-exposure value as an input, recovers latent ground truth at 0.95 correlation, and cleanly separates market-level effects from venue-level execution gaps.",
   ];
   let y = 1.9;
   items.forEach((t, i) => {

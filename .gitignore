@@ -3,8 +3,10 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# Deck build intermediates (keep the .pptx, not the render scratch)
-deck/*.pdf
+# Deck build intermediates. The .pptx, the QA-converted .pdf (GitHub renders
+# PDFs inline, so it doubles as a no-download viewer), and deck/slides/*.jpg
+# (embedded in README so the deck is viewable without opening anything) are
+# all intentionally committed -- only the raw per-run QA scratch is ignored.
 deck/slide-*.jpg
 deck/thumbnails*.jpg
 

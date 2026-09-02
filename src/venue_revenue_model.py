@@ -1,10 +1,11 @@
 """
 venue_revenue_model.py
 ========================
-Phase 2 model: predict a venue's realized weekly ad revenue from observable
+Predicts a venue's realized weekly ad revenue from observable
 characteristics (venue_type, geo_cluster, baseline traffic, screen count,
-dwell time, audience quality, traffic tier) plus Phase 1's RCT-calibrated
-per-exposure lift as a feature. Two uses of the same model:
+dwell time, audience quality, traffic tier) plus the RCT-calibrated
+per-exposure lift (from the causal/MMM pipeline) as a feature. Two uses of
+the same model:
 
   (a) EXISTING venues — an honest, out-of-fold predicted revenue for every
       venue lets us flag venues realizing meaningfully less than peers with
@@ -17,7 +18,8 @@ Model: gradient-boosted trees (HistGradientBoostingRegressor), which handles
 venue_type / geo_cluster / traffic_tier as native categoricals without
 one-hot blowing up geo_cluster into 20+ columns.
 
-Honesty checks built in, same ground-truth-first pattern as Phase 1:
+Honesty checks built in, same ground-truth-first pattern used throughout
+this project:
   - Evaluation metrics (R^2, MAE, MAPE) come from a genuine held-out test
     split, not train-set fit.
   - Under-monetization flags come from 5-fold OUT-OF-FOLD predictions (every
@@ -29,8 +31,8 @@ Honesty checks built in, same ground-truth-first pattern as Phase 1:
     thin_coverage_market, individual_execution_gap) that the model is never
     given. This script checks whether the model's OOF predictions and flags
     actually recover that latent structure -- the same "validate against a
-    known answer before trusting it conceptually" discipline as Phase 1's
-    causal methods.
+    known answer before trusting it conceptually" discipline as the causal
+    methods elsewhere in this project.
 """
 
 import os
