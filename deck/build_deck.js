@@ -63,26 +63,54 @@ function addFooter(slide, pageLabel) {
     x: 0.9, y: 2.75, w: 11.5, h: 1.9, fontSize: 40, color: WHITE, fontFace: "Cambria", bold: true, lineSpacing: 46,
   });
   slide.addText(
-    "A causal measurement framework, calibrated media-mix model, budget optimizer, and venue-revenue model — built to answer the questions Atmosphere's advertising business and its own network economics run on.",
+    "A causal measurement framework, calibrated media-mix model, budget optimizer, and venue revenue + retention models — built to answer the questions Atmosphere's advertising business and its own network economics run on.",
     { x: 0.9, y: 4.75, w: 9.8, h: 0.9, fontSize: 15, color: ICE, fontFace: "Calibri", italic: true }
   );
-  slide.addShape(pres.ShapeType.rect, { x: 0.9, y: 6.55, w: 0.5, h: 0.5, fill: { color: AMBER } });
-  slide.addText("Interview technical demo  •  Senior Data Scientist", {
-    x: 1.55, y: 6.55, w: 8, h: 0.5, fontSize: 12, color: WHITE, fontFace: "Calibri", valign: "middle",
-  });
 }
 
 // ---------------------------------------------------------------------------
-// Slide 2 — Business problem
+// Slide 2 — Honest scope (stated up front, not saved for the end)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Three questions this project answers", {
-    x: 0.6, y: 0.45, w: 12, h: 0.65, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria",
+  slide.addText("Honest scope", { x: 0.6, y: 0.45, w: 8, h: 0.65, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Read this first — every method and result in this deck is presented against these caveats, not just the summary slide at the end.", {
+    x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
-  const cardY = 1.5, cardH = 5.15, cardW = 3.85, gap = 0.3;
+  const rows = [
+    { label: "Synthetic data", body: "Every figure in this project is synthetic, with a known injected ground-truth effect used specifically to validate that each method recovers it before trusting it conceptually. Not a claim about any real company's data." },
+    { label: "Media-effectiveness & rate-card figures", body: "Dwell time, screen count, ad rate card, and similar parameters shown are illustrative demo values, not researched real industry benchmarks. In production: Nielsen OOH, DSP data (e.g. Vistar), or Atmosphere's own play logs and rate card." },
+    { label: "Multi-touch attribution — deliberately not built", body: "Atmosphere's ambient-screen model has no individual-level, cross-venue touchpoint log by default. Building MTA would require purchased mobile location/device-matching data — a real but non-default assumption, so it's scoped out rather than forced." },
+    { label: "Online-purchase attribution — also out of scope", body: "Every method here measures incremental foot traffic, not downstream online purchases. Tying exposure to e-commerce conversions needs a device-matched exposure-to-transaction panel — a further non-default assumption layered on top of MTA's." },
+    { label: "Cost & revenue assumptions", body: "The $/frequency-unit figures behind the budget allocator, and the ad-rate-card behind the venue-revenue model, are illustrative, editable placeholders — in production these come from Atmosphere's own rate card by venue type and daypart." },
+    { label: "Retention model — its own caveats", body: "Churn-hazard, competitive-geo, and engagement-signal parameters are illustrative, not researched attrition benchmarks. geo_cluster is deliberately excluded (small-sample tradeoff); realized_ad_revenue's importance is a venue_type confound, not a causal driver; no prospect-side retention model." },
+  ];
+  let yScope = 1.75;
+  rows.forEach((r) => {
+    slide.addShape(pres.ShapeType.rect, { x: 0.6, y: yScope + 0.04, w: 0.12, h: 0.68, fill: { color: AMBER } });
+    slide.addText(r.label, { x: 0.95, y: yScope, w: 3.0, h: 0.78, fontSize: 12, bold: true, color: NAVY, fontFace: "Calibri", valign: "top", lineSpacing: 13 });
+    slide.addText(r.body, { x: 4.15, y: yScope, w: 8.6, h: 0.78, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12.5, valign: "top" });
+    yScope += 0.86;
+  });
+  addFooter(slide, "Honest scope");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 3 — Business problem
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("Four questions this project answers", {
+    x: 0.6, y: 0.45, w: 12, h: 0.65, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText("Q1–Q2 answer the advertising side (what Atmosphere sells); Q3–Q4 answer the venue-network side (what Atmosphere runs).", {
+    x: 0.6, y: 1.08, w: 12, h: 0.35, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
+  });
+
+  const cardY = 1.6, cardH = 5.05, cardW = 2.85, gap = 0.22;
   const cards = [
     {
       x: 0.6, num: "1", title: "Did the campaign actually work?",
@@ -93,8 +121,12 @@ function addFooter(slide, pageLabel) {
       body: "Given a fixed weekly budget, how should it split across restaurants, gyms, bars, and waiting rooms — accounting for each venue type's own diminishing-returns curve?\n\nThe media-planning / pricing question advertisers ask before they commit spend.",
     },
     {
-      x: 0.6 + 2 * (cardW + gap), num: "3", title: "Where's Atmosphere's own revenue upside?",
-      body: "Which existing venues are under-monetized relative to their own traffic and quality — and which prospective venues are worth prioritizing for network expansion?\n\nAtmosphere's own buy-side question, not the advertiser's.",
+      x: 0.6 + 2 * (cardW + gap), num: "3", title: "Where's the revenue upside?",
+      body: "Which existing venues are under-monetized relative to their own traffic and quality — and which prospective venues are worth prioritizing for expansion?\n\nAtmosphere's own buy-side value question.",
+    },
+    {
+      x: 0.6 + 3 * (cardW + gap), num: "4", title: "Which venues are at risk?",
+      body: "Which existing venues are likely to leave the network, and which ops-visible signals predict it — combined with Q3's revenue into one value-×-risk priority.\n\nAtmosphere's own buy-side risk question.",
     },
   ];
   cards.forEach((c) => {
@@ -102,16 +134,16 @@ function addFooter(slide, pageLabel) {
       x: c.x, y: cardY, w: cardW, h: cardH, rectRadius: 0.12,
       fill: { color: "F5F7FC" }, line: { type: "none" }, shadow: { type: "outer", color: "888888", opacity: 0.25, blur: 6, offset: 3, angle: 90 },
     });
-    slide.addShape(pres.ShapeType.ellipse, { x: c.x + 0.35, y: cardY + 0.35, w: 0.6, h: 0.6, fill: { color: NAVY } });
-    slide.addText(c.num, { x: c.x + 0.35, y: cardY + 0.35, w: 0.6, h: 0.6, fontSize: 20, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
-    slide.addText(c.title, { x: c.x + 0.35, y: cardY + 1.1, w: cardW - 0.7, h: 1.15, fontSize: 16, bold: true, color: NAVY, fontFace: "Cambria", lineSpacing: 19 });
-    slide.addText(c.body, { x: c.x + 0.35, y: cardY + 2.35, w: cardW - 0.7, h: cardH - 2.6, fontSize: 11.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 16 });
+    slide.addShape(pres.ShapeType.ellipse, { x: c.x + 0.28, y: cardY + 0.3, w: 0.55, h: 0.55, fill: { color: NAVY } });
+    slide.addText(c.num, { x: c.x + 0.28, y: cardY + 0.3, w: 0.55, h: 0.55, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+    slide.addText(c.title, { x: c.x + 0.28, y: cardY + 1.0, w: cardW - 0.56, h: 1.15, fontSize: 13.5, bold: true, color: NAVY, fontFace: "Cambria", lineSpacing: 16 });
+    slide.addText(c.body, { x: c.x + 0.28, y: cardY + 2.15, w: cardW - 0.56, h: cardH - 2.4, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 });
   });
   addFooter(slide, "Business framing");
 }
 
 // ---------------------------------------------------------------------------
-// Slide 3 — Design overview (process flow)
+// Slide 4 — Design overview (process flow)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -121,38 +153,73 @@ function addFooter(slide, pageLabel) {
   });
 
   const steps = [
-    { title: "RCT geo-holdout", sub: "High confidence", desc: "Randomized treated/holdout venues. Balance directly verified." },
-    { title: "Synthetic control", sub: "Moderate confidence", desc: "Covers historical, non-randomized campaigns. Validated with placebo tests." },
-    { title: "MMM, RCT-calibrated", sub: "Shape + scale", desc: "Adstock/saturation shape from aggregate data; scale pinned by the RCT." },
-    { title: "Budget allocator", sub: "Exact DP", desc: "Multiple-choice knapsack over calibrated response curves." },
+    { title: "RCT geo-holdout", sub: "High confidence", desc: "Randomized treated/holdout venues. Balance directly verified.", q: "Q1" },
+    { title: "Synthetic control", sub: "Moderate confidence", desc: "Covers historical, non-randomized campaigns. Validated with placebo tests.", q: "Q1" },
+    { title: "MMM, RCT-calibrated", sub: "Shape + scale", desc: "Adstock/saturation shape from aggregate data; scale pinned by the RCT.", q: "Q2" },
+    { title: "Budget allocator", sub: "Exact DP", desc: "Multiple-choice knapsack over calibrated response curves.", q: "Q2" },
+    { title: "Venue revenue model", sub: "GBT, honest OOF", desc: "Venue characteristics + the calibrated lift (steps 1–3) as a feature. Flags under-monetized venues; ranks expansion prospects.", q: "Q3" },
+    { title: "Venue retention model", sub: "GBT classifier, honest OOF", desc: "Ops-visible signals (engagement, uptime, complaints, outreach) + realized revenue. Flags at-risk venues; combines with Q3 into one value×risk priority.", q: "Q4" },
   ];
-  const boxW = 2.75, boxH = 3.1, startX = 0.7, y = 2.0, gapX = 0.4;
+  const QCOLOR = { Q1: NAVY, Q2: "B8500A", Q3: GOOD_GREEN, Q4: "8E3B60" };
+  // Each question gets one color family: dark box = that group's "deliverable" step,
+  // light tint = that group's other step(s) -- so a shared hue, not just the badge,
+  // signals which steps belong together (was a flat neutral gray for steps 2-3 before,
+  // which made Q1's step 2 and Q2's step 3 look like the same group).
+  const LIGHT_TINT = { Q1: "E4E9F7", Q2: "FBE8D2", Q3: "E2F1E9", Q4: "F5E3EC" };
+  const boxW = 1.9, boxH = 3.1, startX = 0.55, y = 2.0, gapX = 0.2;
+  const darkBoxes = [0, 3, 4, 5]; // highest-confidence input (0) + the three concrete deliverables (3, 4, 5)
   steps.forEach((s, i) => {
     const x = startX + i * (boxW + gapX);
+    const isDark = darkBoxes.includes(i);
     slide.addShape(pres.ShapeType.roundRect, {
       x, y, w: boxW, h: boxH, rectRadius: 0.1,
-      fill: { color: i === 0 ? NAVY : i === 3 ? AMBER : "EDEFF7" },
+      fill: { color: i === 0 ? NAVY : i === 3 ? AMBER : i === 4 ? GOOD_GREEN : i === 5 ? QCOLOR.Q4 : LIGHT_TINT[s.q] },
       line: { type: "none" },
     });
-    const titleColor = i === 0 || i === 3 ? WHITE : NAVY;
-    slide.addText(String(i + 1), { x: x + 0.2, y: y + 0.15, w: 0.6, h: 0.5, fontSize: 20, bold: true, color: titleColor, fontFace: "Calibri" });
-    slide.addText(s.title, { x: x + 0.2, y: y + 0.65, w: boxW - 0.4, h: 0.75, fontSize: 15.5, bold: true, color: titleColor, fontFace: "Cambria" });
-    slide.addText(s.sub, { x: x + 0.2, y: y + 1.35, w: boxW - 0.4, h: 0.35, fontSize: 11, bold: true, italic: true, color: i === 0 || i === 3 ? ICE : AMBER, fontFace: "Calibri" });
-    slide.addText(s.desc, { x: x + 0.2, y: y + 1.75, w: boxW - 0.4, h: boxH - 1.9, fontSize: 10.5, color: i === 0 || i === 3 ? WHITE : TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 });
+    const titleColor = isDark ? WHITE : NAVY;
+    // Q1/Q2/Q3/Q4 tag: which of the four business questions (slide 3) this step answers.
+    slide.addShape(pres.ShapeType.roundRect, {
+      x: x + boxW - 0.56, y: y + 0.1, w: 0.44, h: 0.26, rectRadius: 0.06,
+      fill: { color: WHITE }, line: { color: QCOLOR[s.q], width: 1 },
+    });
+    slide.addText(s.q, {
+      x: x + boxW - 0.56, y: y + 0.1, w: 0.44, h: 0.26, fontSize: 9.5, bold: true,
+      color: QCOLOR[s.q], align: "center", valign: "middle", fontFace: "Calibri",
+    });
+    slide.addText(String(i + 1), { x: x + 0.13, y: y + 0.1, w: 0.5, h: 0.42, fontSize: 16, bold: true, color: titleColor, fontFace: "Calibri" });
+    slide.addText(s.title, { x: x + 0.13, y: y + 0.56, w: boxW - 0.26, h: 0.8, fontSize: 12, bold: true, color: titleColor, fontFace: "Cambria", lineSpacing: 13.5 });
+    slide.addText(s.sub, { x: x + 0.13, y: y + 1.4, w: boxW - 0.26, h: 0.35, fontSize: 9, bold: true, italic: true, color: isDark ? ICE : QCOLOR[s.q], fontFace: "Calibri" });
+    slide.addText(s.desc, { x: x + 0.13, y: y + 1.78, w: boxW - 0.26, h: boxH - 1.93, fontSize: 8.7, color: isDark ? WHITE : TEXT_DARK, fontFace: "Calibri", lineSpacing: 11 });
     if (i < steps.length - 1) {
-      slide.addText("→", { x: x + boxW, y: y + boxH / 2 - 0.3, w: gapX, h: 0.6, fontSize: 22, color: NAVY, align: "center", fontFace: "Arial" });
+      slide.addText("→", { x: x + boxW, y: y + boxH / 2 - 0.3, w: gapX, h: 0.6, fontSize: 16, color: NAVY, align: "center", fontFace: "Arial" });
     }
   });
 
+  // Grouping labels under each step (or pair of steps), tying the flow back to slide 3's numbered
+  // questions — each question gets the same visual treatment, not a footnote.
+  const groupLabelY = y + boxH + 0.12;
+  slide.addText("Answers Q1 — did the campaign work?", {
+    x: startX, y: groupLabelY, w: 2 * boxW + gapX, h: 0.4, fontSize: 10, bold: true, color: QCOLOR.Q1, align: "center", fontFace: "Calibri", lineSpacing: 12,
+  });
+  slide.addText("Answers Q2 — how should budget be spent?", {
+    x: startX + 2 * (boxW + gapX), y: groupLabelY, w: 2 * boxW + gapX, h: 0.4, fontSize: 10, bold: true, color: QCOLOR.Q2, align: "center", fontFace: "Calibri", lineSpacing: 12,
+  });
+  slide.addText("Answers Q3 — revenue upside?", {
+    x: startX + 4 * (boxW + gapX), y: groupLabelY, w: boxW, h: 0.4, fontSize: 10, bold: true, color: QCOLOR.Q3, align: "center", fontFace: "Calibri", lineSpacing: 12,
+  });
+  slide.addText("Answers Q4 — retention risk?", {
+    x: startX + 5 * (boxW + gapX), y: groupLabelY, w: boxW, h: 0.4, fontSize: 10, bold: true, color: QCOLOR.Q4, align: "center", fontFace: "Calibri", lineSpacing: 12,
+  });
+
   slide.addText(
-    "Why this shape: a single trusted experimental read (RCT) is expensive to run everywhere, so it's used to calibrate a richer but less-trusted model (MMM) that covers the whole network — and that calibrated model then powers a budget decision.",
-    { x: 0.7, y: 5.5, w: 11.9, h: 1.1, fontSize: 13, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 18 }
+    "Steps 1–2 answer Q1: RCT for randomized campaigns, synthetic control extending coverage to historical, non-randomized ones. Steps 3–4 turn that into Q2: MMM shapes the response curve, the RCT pins its scale, and the allocator solves the exact split. Step 5 answers Q3: the venue-revenue model reuses the calibrated per-exposure lift from steps 1–3 as a feature. Step 6 answers Q4: a separate churn classifier flags at-risk venues, then combines its risk score with step 5's revenue into one value-×-risk priority — one connected system feeding all four answers, not four separate projects bolted together.",
+    { x: 0.7, y: 5.78, w: 11.9, h: 1.15, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 13.5 }
   );
   addFooter(slide, "Design overview");
 }
 
 // ---------------------------------------------------------------------------
-// Slide 4 — Data & methodology
+// Slide 5 — Data & methodology
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -192,7 +259,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 5 — RCT results
+// Slide 6 — RCT results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -243,7 +310,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 6 — Synthetic control results
+// Slide 7 — Synthetic control results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -288,7 +355,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 7 — MMM calibration (the headline technical story)
+// Slide 8 — MMM calibration (the headline technical story)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -334,7 +401,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 8 — Budget allocator
+// Slide 9 — Budget allocator
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -377,7 +444,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 9 — The other side of the business
+// Slide 10 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -393,11 +460,12 @@ function addFooter(slide, pageLabel) {
     "Feeds go-to-market: sell-side differentiator, client trust",
     "RCT + synthetic control + calibrated MMM + budget DP",
   ]};
-  const p2 = { x: 0.6 + colW + gap, title: "Venue economics", items: [
-    "Predict a venue's realized ad-revenue from its characteristics",
-    "Flag under-monetized existing venues for sales/ops follow-up",
-    "Rank prospective venues for expansion priority",
-    "Gradient-boosted trees, honest out-of-fold evaluation",
+  const p2 = { x: 0.6 + colW + gap, title: "Venue network economics", items: [
+    "Predict realized ad-revenue (Q3) and 90-day churn risk (Q4) from characteristics and ops signals",
+    "Flag under-monetized (Q3) and at-risk (Q4) existing venues for sales/ops follow-up",
+    "Rank prospective venues for expansion priority (Q3)",
+    "Combine Q3 revenue + Q4 risk into one value-×-risk priority quadrant",
+    "GBT regressor + classifier, honest out-of-fold evaluation throughout",
   ]};
   [p1, p2].forEach((p, idx) => {
     slide.addShape(pres.ShapeType.roundRect, {
@@ -405,10 +473,13 @@ function addFooter(slide, pageLabel) {
       fill: { color: idx === 0 ? "2A3480" : AMBER }, line: { type: "none" },
     });
     slide.addText(p.title, { x: p.x + 0.4, y: y0 + 0.3, w: colW - 0.8, h: 0.65, fontSize: 16, bold: true, color: WHITE, fontFace: "Cambria" });
-    let iy = y0 + 1.15;
+    let iy = y0 + 1.1;
+    const itemH = idx === 0 ? 0.65 : 0.58;
+    const itemStep = idx === 0 ? 0.72 : 0.66;
+    const itemFontSize = idx === 0 ? 12 : 10.8;
     p.items.forEach((it) => {
-      slide.addText("• " + it, { x: p.x + 0.4, y: iy, w: colW - 0.8, h: 0.65, fontSize: 12, color: WHITE, fontFace: "Calibri", lineSpacing: 15 });
-      iy += 0.72;
+      slide.addText("• " + it, { x: p.x + 0.4, y: iy, w: colW - 0.8, h: itemH, fontSize: itemFontSize, color: WHITE, fontFace: "Calibri", lineSpacing: 13.5 });
+      iy += itemStep;
     });
     if (idx === 0) {
       slide.addText(
@@ -424,7 +495,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — Venue revenue model results
+// Slide 11 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -490,31 +561,78 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 11 — Honest scope
+// Slide 12 — Venue retention model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Honest scope", { x: 0.6, y: 0.5, w: 8, h: 0.7, fontSize: 30, bold: true, color: NAVY, fontFace: "Cambria" });
-
-  const rows = [
-    { label: "Synthetic data", body: "Every figure in this project is synthetic, with a known injected ground-truth effect used specifically to validate that each method recovers it before trusting it conceptually. Not a claim about any real company's data." },
-    { label: "Media-effectiveness & rate-card figures", body: "Dwell time, screen count, ad rate card, and similar parameters shown are illustrative demo values, not researched real industry benchmarks. In production: Nielsen OOH, DSP data (e.g. Vistar), or Atmosphere's own play logs and rate card." },
-    { label: "Multi-touch attribution — deliberately not built", body: "Atmosphere's ambient-screen model has no individual-level, cross-venue touchpoint log by default. Building MTA would require purchased mobile location/device-matching data — a real but non-default assumption, so it's scoped out rather than forced." },
-    { label: "Cost & revenue assumptions", body: "The $/frequency-unit figures behind the budget allocator, and the ad-rate-card behind the venue-revenue model, are illustrative, editable placeholders — in production these come from Atmosphere's own rate card by venue type and daypart." },
-  ];
-  let y = 1.5;
-  rows.forEach((r) => {
-    slide.addShape(pres.ShapeType.rect, { x: 0.6, y: y + 0.06, w: 0.12, h: 1.05, fill: { color: AMBER } });
-    slide.addText(r.label, { x: 0.95, y, w: 3.0, h: 1.2, fontSize: 13.5, bold: true, color: NAVY, fontFace: "Calibri", valign: "top" });
-    slide.addText(r.body, { x: 4.15, y, w: 8.6, h: 1.2, fontSize: 12, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 16, valign: "top" });
-    y += 1.32;
+  slide.addText("Predicting venue churn risk, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Gradient-boosted classifier on ops-visible signals (engagement, uptime, complaints, competitor outreach) — the other half of \"what makes a venue valuable and what puts it at risk.\"", {
+    x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
-  addFooter(slide, "Honest scope");
+
+  const p3 = DATA.venue_retention;
+  const metricY = 1.65;
+  const metrics2 = [
+    { label: "Held-out AUC (oracle ceiling: 0.73)", value: p3.auc_test.toFixed(2) },
+    { label: "Held-out PR-AUC", value: p3.pr_auc_test.toFixed(2) },
+    { label: "OOF corr. w/ latent true risk", value: p3.oof_true_risk_corr.toFixed(2) },
+    { label: "Flagged-tail latent risk rate", value: `${p3.flagged_latent_gap_rate.toFixed(0)}% vs ${p3.population_latent_gap_rate.toFixed(0)}%` },
+  ];
+  const mW2 = 2.9;
+  metrics2.forEach((m, i) => {
+    const x = 0.6 + i * (mW2 + 0.15);
+    slide.addShape(pres.ShapeType.roundRect, { x, y: metricY, w: mW2, h: 1.15, rectRadius: 0.08, fill: { color: "F5F7FC" }, line: { type: "none" } });
+    slide.addText(m.value, { x: x + 0.15, y: metricY + 0.12, w: mW2 - 0.3, h: 0.55, fontSize: 22, bold: true, color: NAVY, fontFace: "Calibri" });
+    slide.addText(m.label, { x: x + 0.15, y: metricY + 0.68, w: mW2 - 0.3, h: 0.4, fontSize: 9, color: TEXT_MUTED, fontFace: "Calibri" });
+  });
+
+  // feature importance chart (left)
+  const feat2 = p3.top_features.slice().reverse();
+  slide.addChart(pres.ChartType.bar, [
+    { name: "Importance (mean AUC drop)", labels: feat2.map((f) => f.feature.replace(/_/g, " ")), values: feat2.map((f) => f.importance) },
+  ], {
+    x: 0.6, y: 3.15, w: 5.9, h: 3.55, barDir: "bar", chartColors: ["C44E52"], showLegend: false,
+    showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelFormatCode: "0.000",
+    catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
+    valAxisLabelFontSize: 8.5, valAxisLabelColor: TEXT_MUTED,
+    catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
+    title: "Feature importance (permutation, test set) — leading indicators", showTitle: true, titleFontSize: 11, titleColor: NAVY,
+  });
+
+  // top at-risk venues + priority quadrant (right)
+  let ty2 = 3.15;
+  slide.addText(`Top at-risk venues (of ${p3.n_flagged} flagged, by OOF risk)`, { x: 6.85, y: ty2, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
+  ty2 += 0.36;
+  p3.top_at_risk.slice(0, 4).forEach((f) => {
+    slide.addText(`Venue #${f.venue_id} (${VTYPE_LABEL[f.venue_type]})`, { x: 6.85, y: ty2, w: 4.0, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(`${(f.churn_risk_oof * 100).toFixed(0)}%`, { x: 10.9, y: ty2, w: 1.85, h: 0.3, fontSize: 10, bold: true, color: "B8500A", fontFace: "Calibri", align: "right" });
+    ty2 += 0.32;
+  });
+  ty2 += 0.2;
+  slide.addText("Priority quadrant (Q3 revenue × Q4 risk)", { x: 6.85, y: ty2, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
+  ty2 += 0.36;
+  const QUAD_COLOR = {
+    "Save now (high value, high risk)": "B8500A",
+    "Protect (high value, low risk)": GOOD_GREEN,
+    "Low priority (low value, high risk)": TEXT_MUTED,
+    "Monitor (low value, low risk)": "5B6178",
+  };
+  Object.entries(p3.quadrant_counts).forEach(([label, count]) => {
+    slide.addText(label, { x: 6.85, y: ty2, w: 4.4, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(String(count), { x: 11.15, y: ty2, w: 1.6, h: 0.3, fontSize: 10, bold: true, color: QUAD_COLOR[label] || NAVY, fontFace: "Calibri", align: "right" });
+    ty2 += 0.32;
+  });
+
+  slide.addText(
+    "Flags come from 5-fold out-of-fold predictions. AUC/PR-AUC look modest next to the revenue model's R² — but an oracle with the true latent risk still only scores 0.73 AUC, so 0.65 is near this problem's honest ceiling. realized_ad_revenue's importance is a venue_type confound, not a causal driver of churn.",
+    { x: 0.6, y: 6.65, w: 12.1, h: 0.55, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+  );
+  addFooter(slide, "Venue retention");
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — Closing / takeaways
+// Slide 13 — Closing / takeaways
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -525,7 +643,7 @@ function addFooter(slide, pageLabel) {
     "Match the method to the assignment mechanism — RCT where randomization is designed, synthetic control where it isn't, each with its own validation check.",
     "An uncalibrated MMM understated true incremental value by up to 165% here — experiment calibration isn't optional polish, it's the identification fix.",
     "Optimization needs the right algorithm for the curve's shape — a greedy heuristic silently lost to a naive baseline on non-concave response curves; the exact DP formulation doesn't.",
-    "One connected system, not two projects: the venue-revenue model reuses the causal pipeline's per-exposure value as an input, recovers latent ground truth at 0.95 correlation, and cleanly separates market-level effects from venue-level execution gaps.",
+    "One connected system, not four separate projects: the venue-revenue model reuses the causal pipeline's per-exposure value as an input; the retention model then combines its own churn-risk score with that revenue prediction into one value-×-risk priority quadrant — both models recover their respective latent ground truths (0.95 and 0.73 correlation) before either is trusted.",
   ];
   let y = 1.9;
   items.forEach((t, i) => {

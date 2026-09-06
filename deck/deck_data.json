@@ -281,5 +281,67 @@
         "predicted_revenue": 492.0
       }
     ]
+  },
+  "venue_retention": {
+    "auc_test": 0.649,
+    "pr_auc_test": 0.271,
+    "brier_test": 0.13,
+    "oracle_ceiling_auc": 0.726,
+    "true_risk_corr": 0.775,
+    "oof_true_risk_corr": 0.73,
+    "n_flagged": 20,
+    "flagged_latent_gap_rate": 100.0,
+    "population_latent_gap_rate": 31.2,
+    "top_features": [
+      {
+        "feature": "screen_uptime_pct",
+        "importance": 0.0792
+      },
+      {
+        "feature": "realized_ad_revenue",
+        "importance": 0.0387
+      },
+      {
+        "feature": "engagement_trend_90d",
+        "importance": 0.0116
+      },
+      {
+        "feature": "competitor_outreach_flag",
+        "importance": 0.0089
+      }
+    ],
+    "top_at_risk": [
+      {
+        "venue_id": 281,
+        "venue_type": "bar",
+        "churn_risk_oof": 0.602
+      },
+      {
+        "venue_id": 200,
+        "venue_type": "bar",
+        "churn_risk_oof": 0.547
+      },
+      {
+        "venue_id": 12,
+        "venue_type": "restaurant",
+        "churn_risk_oof": 0.518
+      },
+      {
+        "venue_id": 244,
+        "venue_type": "bar",
+        "churn_risk_oof": 0.515
+      },
+      {
+        "venue_id": 73,
+        "venue_type": "restaurant",
+        "churn_risk_oof": 0.502
+      }
+    ],
+    "quadrant_counts": {
+      "Save now (high value, high risk)": 136,
+      "Monitor (low value, low risk)": 136,
+      "Protect (high value, low risk)": 64,
+      "Low priority (low value, high risk)": 64
+    }
   }
 }
