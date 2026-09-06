@@ -69,13 +69,68 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 2 — Honest scope (stated up front, not saved for the end)
+// Slide 2 — How I'd approach this role (point of view, before the demo)
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("How I'd approach this role", { x: 0.6, y: 0.45, w: 12, h: 0.65, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Before the demo — the operating thesis behind it: what this role should do for Atmosphere, and how I'd prioritize the first few months as its first data scientist.", {
+    x: 0.6, y: 1.12, w: 12.1, h: 0.45, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15,
+  });
+
+  const pillarY = 1.75, pillarH = 1.7, pillarW = 5.85, pillarGap = 0.3;
+  const pillars = [
+    {
+      x: 0.6, title: "Advertising-side measurement",
+      body: "Prove Atmosphere's own incremental foot traffic with methods advertisers can trust — the sell-side differentiator this business runs on. (Answers Q1–Q2.)",
+    },
+    {
+      x: 0.6 + pillarW + pillarGap, title: "Venue-network health",
+      body: "Know which venues are worth more than they're being paid, and which are at risk of leaving — protect and grow the inventory Atmosphere actually sells. (Answers Q3–Q4.)",
+    },
+  ];
+  pillars.forEach((p) => {
+    slide.addShape(pres.ShapeType.roundRect, {
+      x: p.x, y: pillarY, w: pillarW, h: pillarH, rectRadius: 0.1, fill: { color: "F5F7FC" }, line: { type: "none" },
+    });
+    slide.addText(p.title, { x: p.x + 0.35, y: pillarY + 0.28, w: pillarW - 0.7, h: 0.55, fontSize: 15.5, bold: true, color: NAVY, fontFace: "Cambria", lineSpacing: 18 });
+    slide.addText(p.body, { x: p.x + 0.35, y: pillarY + 0.86, w: pillarW - 0.7, h: 0.75, fontSize: 11, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14.5 });
+  });
+
+  slide.addShape(pres.ShapeType.roundRect, {
+    x: 0.6, y: pillarY + pillarH + 0.3, w: 12.1, h: 1.55, rectRadius: 0.08, fill: { color: "FDF1E3" }, line: { type: "none" },
+  });
+  slide.addText("Not a “quick win vs. foundation” tradeoff — do both in one move", {
+    x: 0.85, y: pillarY + pillarH + 0.42, w: 11.6, h: 0.4, fontSize: 13.5, bold: true, color: "8A4B0A", fontFace: "Cambria",
+  });
+  slide.addText(
+    "A stratified RCT geo-holdout is the fastest trustworthy result available — and it doubles as the calibration anchor every other method here relies on: synthetic control's placebo check, the MMM's scale, and the venue models' causal-value feature. Ship it first and the “quick win” and the “foundation” are the same deliverable. The venue-network data pipeline (economics + retention features) doesn't have to wait on it — it builds in parallel.",
+    { x: 0.85, y: pillarY + pillarH + 0.82, w: 11.6, h: 0.95, fontSize: 11, italic: true, color: "8A4B0A", fontFace: "Calibri", lineSpacing: 14.5 }
+  );
+
+  const doneY = pillarY + pillarH + 0.3 + 1.55 + 0.22;
+  slide.addText("What “done” means", { x: 0.6, y: doneY, w: 12.1, h: 0.32, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText(
+    "Sales and account teams making different decisions with it: a trusted lift number in a client pitch, a budget conversation anchored to a real response curve, an outreach list ranked by value × risk instead of instinct — not just a model with a good accuracy number.",
+    { x: 0.6, y: doneY + 0.34, w: 12.1, h: 0.55, fontSize: 11, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14.5 }
+  );
+
+  slide.addText(
+    "What follows is one concrete example of applying this approach — a synthetic demo, validated end to end against a known ground truth.",
+    { x: 0.6, y: 6.68, w: 12.1, h: 0.4, fontSize: 11.5, italic: true, color: AMBER, fontFace: "Calibri" }
+  );
+  addFooter(slide, "How I'd approach this role");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 3 — Honest scope (project-specific disclaimer before the demo)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("Honest scope", { x: 0.6, y: 0.45, w: 8, h: 0.65, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria" });
-  slide.addText("Read this first — every method and result in this deck is presented against these caveats, not just the summary slide at the end.", {
+  slide.addText("Before the demo that follows: the scope caveats specific to this project, stated up front rather than saved for the closing slide.", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
@@ -98,7 +153,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 3 — Business problem
+// Slide 4 — Business problem
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -143,7 +198,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 4 — Design overview (process flow)
+// Slide 5 — Design overview (process flow)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -219,7 +274,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 5 — Data & methodology
+// Slide 6 — Data & methodology
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -259,7 +314,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 6 — RCT results
+// Slide 7 — RCT results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -310,7 +365,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 7 — Synthetic control results
+// Slide 8 — Synthetic control results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -355,7 +410,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 8 — MMM calibration (the headline technical story)
+// Slide 9 — MMM calibration (the headline technical story)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -401,7 +456,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 9 — Budget allocator
+// Slide 10 — Budget allocator
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -444,7 +499,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — The other side of the business
+// Slide 11 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -495,7 +550,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 11 — Venue revenue model results
+// Slide 12 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -561,7 +616,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — Venue retention model results
+// Slide 13 — Venue retention model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -632,7 +687,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 13 — Closing / takeaways
+// Slide 14 — Closing / takeaways
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
