@@ -45,7 +45,8 @@ in-browser if you'd rather page through it there.)
 <img src="deck/slides/slide-10.jpg" width="800"><br>
 <img src="deck/slides/slide-11.jpg" width="800"><br>
 <img src="deck/slides/slide-12.jpg" width="800"><br>
-<img src="deck/slides/slide-13.jpg" width="800">
+<img src="deck/slides/slide-13.jpg" width="800"><br>
+<img src="deck/slides/slide-14.jpg" width="800">
 </p>
 
 ## Design
