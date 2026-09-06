@@ -1,6 +1,6 @@
 # Atmosphere TV: DOOH Venue Incrementality & Media-Mix Measurement
 
-A technical demo project built for a Senior Data Scientist interview, answering the three
+A technical demo project built for a Senior Data Scientist interview, answering the four
 questions Atmosphere's business runs on:
 
 1. **Did the campaign actually work?** — isolate the true incremental foot traffic caused
@@ -11,6 +11,14 @@ questions Atmosphere's business runs on:
 3. **Where's Atmosphere's own revenue upside?** — which existing venues are under-monetized
    relative to their own traffic and quality, and which prospective venues are worth
    prioritizing for network expansion?
+4. **Which venues are at risk of leaving, and why?** — turn engagement/ops signals
+   (engagement trend, screen uptime, complaints, self-ad-slot usage, competitor outreach)
+   into a ranked, leading-indicator-backed watchlist, then combine it with Q3's revenue
+   model into one value-×-risk priority call, not two disconnected reports.
+
+Q1–Q2 answer the *advertising* side of the business (what Atmosphere sells); Q3–Q4 answer
+the *venue-network* side (what Atmosphere runs) — together mirroring the two things this
+role is scoped to make Atmosphere smarter about.
 
 > **This is a synthetic demo, not a claim about Atmosphere's real data or production
 > systems.** Every dataset here is generated with a *known, injected ground-truth effect*
@@ -36,7 +44,8 @@ in-browser if you'd rather page through it there.)
 <img src="deck/slides/slide-09.jpg" width="800"><br>
 <img src="deck/slides/slide-10.jpg" width="800"><br>
 <img src="deck/slides/slide-11.jpg" width="800"><br>
-<img src="deck/slides/slide-12.jpg" width="800">
+<img src="deck/slides/slide-12.jpg" width="800"><br>
+<img src="deck/slides/slide-13.jpg" width="800">
 </p>
 
 ## Design
@@ -51,6 +60,7 @@ into the models that scale it across the whole network:
 | 3 | **Media-mix model (MMM)** | Shape from data, scale from RCT | Adstock + saturation curves fit on the aggregate weekly exposure series are not causally identified on their own — the RCT's point estimate is used to *calibrate* the model's scale, while its shape (decay, saturation) comes from the richer aggregate series. |
 | 4 | **Budget allocator** | Exact DP | An exact dynamic-programming (multiple-choice knapsack) solve over the calibrated response curves — **not** a greedy marginal-value walk. A Hill/S-shaped response curve is convex before its inflection point, so a greedy heuristic isn't guaranteed optimal; an earlier greedy version of this allocator measurably underperformed a naive equal-split baseline. The DP has no concavity requirement and is guaranteed to find the grid-optimal allocation. |
 | 5 | **Venue revenue model** | GBT, honest OOF | A gradient-boosted-trees model predicts each venue's realized ad revenue from observable characteristics *plus the RCT-calibrated per-exposure lift from stage 1–3 as a feature* — one connected pipeline, not a separate project bolted on. 5-fold out-of-fold predictions (never a model scoring the venue it was trained on) power under-monetization flags on existing venues; the same model, refit on all existing venues, scores never-before-seen prospects for expansion priority. |
+| 6 | **Venue retention model** | GBT classifier, honest OOF | Predicts each venue's 90-day churn risk from ops-visible signals (engagement trend, screen uptime, complaints, self-ad-slot usage, competitor outreach) — the "leading indicators" half of the venue-network question that stage 5 doesn't answer. 5-fold OOF risk scores flag at-risk venues; combined with stage 5's OOF revenue into one value-×-risk priority quadrant, closing the loop instead of leaving revenue and retention as two separate reports. |
 
 ## Key results (synthetic, see `outputs/tables/`)
 
@@ -73,6 +83,17 @@ into the models that scale it across the whole network:
   under-monetization rate vs. **28%** network-wide — strong enrichment in the flagged
   tail, even though the residual correlates only weakly with latent efficiency across the
   *full* population (see [Honest scope](#honest-scope)).
+- **Venue retention model**: held-out AUC = **0.65**, PR-AUC = **0.27** — modest-looking
+  numbers that are honestly close to this synthetic problem's own ceiling (an oracle that
+  knew the true latent risk exactly still only scores **0.73** AUC against the noisy
+  realized churn outcome). OOF risk scores correlate **0.73** with the latent true risk the
+  model never sees, and the 20 highest-risk venues by OOF score carry a **100%** latent
+  risk-flag rate vs. **31%** network-wide (`outputs/tables/venue_retention_model_eval.csv`).
+
+**Q3 + Q4 combined**: the two OOF outputs merge into one value-×-risk priority quadrant
+(`outputs/tables/venue_priority_quadrant.csv`) — high-value/high-risk venues get a
+"save now" flag, rather than sales/ops reading a revenue report and a churn report
+separately and reconciling them by hand.
 
 ## Repo layout
 
@@ -85,8 +106,11 @@ src/
   budget_allocator.py           # exact DP budget allocation across venue types
   venue_economics_data.py       # synthetic venue revenue economics + prospect venues
   venue_revenue_model.py        # GBT revenue model, OOF under-monetization flags, prospect ranking
+  venue_retention_data.py        # synthetic venue engagement/ops signals + churn ground truth
+  venue_retention_model.py       # GBT classifier, OOF at-risk flags, value x risk priority quadrant
 data/                          # generated venues.csv, weekly_panel.csv, ground_truth.json,
-                                # venue_economics.csv, prospect_venues.csv, venue_economics_ground_truth.json
+                                # venue_economics.csv, prospect_venues.csv, venue_economics_ground_truth.json,
+                                # venue_retention.csv, venue_retention_ground_truth.json
 outputs/tables/                # every script's output tables (effect estimates, params)
 outputs/figures/               # (reserved for exported static figures)
 dashboard/
@@ -111,17 +135,22 @@ python3 src/mmm_model.py                    # 4. MMM, calibrated against the RCT
 python3 src/budget_allocator.py             # 5. budget allocation examples (CLI)
 python3 src/venue_economics_data.py         # 6. synthetic venue revenue economics + prospects
 python3 src/venue_revenue_model.py          # 7. venue revenue model, OOF flags, prospect ranking
+python3 src/venue_retention_data.py         # 8. synthetic venue engagement/ops signals + churn outcome
+python3 src/venue_retention_model.py        # 9. retention model, OOF at-risk flags, priority quadrant
+                                             #    (reads step 7's OOF output -- run venue_revenue_model.py first)
 
-streamlit run dashboard/streamlit_app.py    # interactive dashboard (5 tabs)
+streamlit run dashboard/streamlit_app.py    # interactive dashboard
 ```
 
-## Venue revenue: the other side of the business
+## The other side of the business: venue network economics
 
 The pipeline above answers the *advertising* side — proving and pricing incrementality,
 which feeds Atmosphere's go-to-market motion as a sell-side differentiator. This part
-answers Atmosphere's other growth lever, its *venue network*: which existing venues are
-under-monetized relative to their own traffic and quality, and which prospective venues
-are worth prioritizing for expansion.
+answers Atmosphere's other growth lever, its *venue network* — split into the same two
+halves the business itself frames it as: what makes a venue **valuable** (Q3, revenue),
+and what puts a venue **at risk** (Q4, retention).
+
+### Q3 — Venue revenue model
 
 **Design**: a gradient-boosted-trees model (`HistGradientBoostingRegressor`) predicts each
 venue's realized weekly ad revenue from observable characteristics (venue_type,
@@ -151,6 +180,36 @@ but the residual correlates only weakly with efficiency across the *whole* popul
 an observed feature — the residual is deliberately measuring deviation from peers, not
 absolute efficiency).
 
+### Q4 — Venue retention model
+
+**Design**: a gradient-boosted-trees *classifier* (`HistGradientBoostingClassifier`)
+predicts each existing venue's 90-day churn probability from ops-visible signals a real
+account team could actually observe day to day — engagement trend, screen uptime,
+complaint volume, self-ad-slot utilization, competitor-outreach flags, tenure — plus its
+realized ad revenue. Unlike the revenue model, `geo_cluster` is deliberately **not** a
+feature here: with only ~20 venues per geo cluster, a 20-level categorical measurably hurt
+held-out AUC in testing rather than helping, so it was left out rather than kept for
+symmetry with Q3. Two things this produces:
+
+- **At-risk flags** on existing venues, from 5-fold OOF risk scores — the same
+  never-scored-on-itself discipline as Q3's under-monetization flags.
+- **A value-×-risk priority quadrant**, merging this model's OOF churn risk with Q3's OOF
+  revenue prediction — "save now" (high value, high risk), "protect" (high value, low
+  risk), "low priority" (low value, high risk), "monitor" (low value, low risk) —
+  Q3 and Q4 feeding one decision instead of two separate reports (`outputs/tables/venue_priority_quadrant.csv`).
+
+**Validation**: this demo injects a latent "true 90-day churn risk" (venue-type baseline
+hazard + a few geo markets under aggressive competitive pressure + an independent ~15% of
+venues with a poor account relationship + a tenure-shaped early/renewal-window bump) —
+never given to the model, only the noisy engagement/ops signals it's built from. Held-out
+AUC (0.65) and PR-AUC (0.27) look modest next to the revenue model's R² of 0.84, but that's
+the honest ceiling of this problem: even an oracle that knew the true risk exactly only
+scores 0.73 AUC against the realized (Bernoulli-noisy) churn outcome. What the model does
+recover well: OOF risk scores correlate 0.73 with the latent true risk, and the 20
+highest-risk venues by OOF score carry a 100% latent risk-flag rate vs. 31% network-wide —
+see [Honest scope](#honest-scope) for why `realized_ad_revenue` carries real (not
+near-zero) importance here, and what that does and doesn't imply.
+
 ## Honest scope
 
 - **All data is synthetic**, generated with a known injected ground-truth effect used to
@@ -178,9 +237,34 @@ absolute efficiency).
   building MTA would require purchased mobile location/device-matching data, a real but
   non-default assumption. Rather than force a model onto a data structure that doesn't
   exist, MTA is scoped out and the reason is named directly.
+- **Online-purchase attribution is out of scope, for the same reason.** Every method here
+  measures incremental *foot traffic* into physical venues — none of it ties ad exposure
+  to downstream online purchases. Doing that would require a device-matched panel linking
+  the ad-exposure log to a retailer's or card network's online transaction data, a further
+  non-default assumption layered on top of MTA's. It's named here rather than left as an
+  implicit gap.
 - **Cost-per-frequency-unit assumptions** behind the budget allocator are illustrative,
   editable placeholders (see `DEFAULT_COST_PER_FREQ_UNIT` in `src/budget_allocator.py`),
   not a researched Atmosphere rate card.
+- **The retention model's churn-hazard rates, competitive-pressure geos, and engagement
+  signal generators are illustrative demo parameters** (`BASE_HAZARD` in
+  `src/venue_retention_data.py`), not researched real Atmosphere churn rates or actual
+  engagement/streaming telemetry.
+- **`realized_ad_revenue` carries real, not near-zero, permutation importance in the
+  retention model** — worth naming rather than glossing over, since the revenue model's
+  calibrated-lift feature is a near-zero-importance honesty check and this one isn't the
+  same shape. It's confounded, not causal: venue_type drives both a venue's base ad rate
+  and its baseline churn hazard (hospitality types run hotter on both), so revenue and risk
+  share a common driver rather than one causing the other. Flagging that distinction before
+  anyone acts on "high revenue predicts churn" is the point of naming it here.
+- **`geo_cluster` was deliberately dropped from the retention model's features** (unlike
+  the revenue model, where it's a strong predictor) — with only ~20 venues per geo cluster,
+  it measurably hurt held-out AUC rather than helping, a real small-sample tradeoff rather
+  than an oversight.
+- **No prospect-side retention model.** Churn risk is only modeled for venues already in
+  the network — a never-signed prospect has no tenure, engagement history, or account
+  relationship to draw on, so there's nothing analogous to Q3's prospect-ranking use case
+  here; retention is an existing-venue-only question in this demo.
 - **A real production deployment** would additionally need independent model-risk
   validation (documented intended use, assumptions, and limitations; a conceptual-
   soundness review by a separate team; ongoing monitoring of whether estimated effects
