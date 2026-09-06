@@ -65,12 +65,19 @@ def load_all():
     revenue_importance = pd.read_csv(os.path.join(OUT_TABLES, "venue_revenue_feature_importance.csv"))
     revenue_flags = pd.read_csv(os.path.join(OUT_TABLES, "venue_underperformance_flags.csv"))
     prospect_ranking = pd.read_csv(os.path.join(OUT_TABLES, "prospect_ranking.csv"))
+    retention_eval = pd.read_csv(os.path.join(OUT_TABLES, "venue_retention_model_eval.csv"))
+    retention_calib = pd.read_csv(os.path.join(OUT_TABLES, "venue_retention_calibration.csv"))
+    retention_importance = pd.read_csv(os.path.join(OUT_TABLES, "venue_retention_feature_importance.csv"))
+    at_risk_flags = pd.read_csv(os.path.join(OUT_TABLES, "venue_at_risk_flags.csv"))
+    priority_quadrant = pd.read_csv(os.path.join(OUT_TABLES, "venue_priority_quadrant.csv"))
     return (venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves,
-            revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking)
+            revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking,
+            retention_eval, retention_calib, retention_importance, at_risk_flags, priority_quadrant)
 
 
 (venues, rct, balance, sc, mmm_params, mmm_curves, sc_curves,
- revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking) = load_all()
+ revenue_eval, revenue_calib, revenue_importance, revenue_flags, prospect_ranking,
+ retention_eval, retention_calib, retention_importance, at_risk_flags, priority_quadrant) = load_all()
 
 st.title("Atmosphere TV — DOOH Venue Incrementality & Media-Mix Measurement")
 st.caption(
@@ -79,8 +86,9 @@ st.caption(
     "actually recovers it before trusting it conceptually."
 )
 
-tab_overview, tab_causal, tab_mmm, tab_budget, tab_revenue = st.tabs(
-    ["Overview", "Causal Measurement", "Media-Mix Model", "Budget Allocator", "Venue Revenue & Expansion"]
+tab_overview, tab_causal, tab_mmm, tab_budget, tab_revenue, tab_retention = st.tabs(
+    ["Overview", "Causal Measurement", "Media-Mix Model", "Budget Allocator",
+     "Venue Revenue & Expansion", "Venue Retention"]
 )
 
 # ---------------------------------------------------------------------------
@@ -88,10 +96,15 @@ tab_overview, tab_causal, tab_mmm, tab_budget, tab_revenue = st.tabs(
 # ---------------------------------------------------------------------------
 with tab_overview:
     st.subheader("What this answers")
-    col1, col2, col3 = st.columns(3)
+    st.caption(
+        "Q1-Q2 are advertiser-facing (sell-side); Q3-Q4 are Atmosphere's own venue-network "
+        "economics (buy-side) — the other half of the business the JD's 'predictive venue "
+        "modeling' pillar asks about."
+    )
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown(
-            "**Advertiser-facing (sell-side differentiator):**\n\n"
+            "**Q1 — Advertiser-facing (sell-side differentiator):**\n\n"
             "Did the campaign actually cause incremental foot traffic — net of "
             "seasonality, trend, and each venue's own baseline pattern? Isolating "
             "this incremental effect turns measurement into something Atmosphere's "
@@ -99,7 +112,7 @@ with tab_overview:
         )
     with col2:
         st.markdown(
-            "**Media planning (budget allocation):**\n\n"
+            "**Q2 — Media planning (budget allocation):**\n\n"
             "Given a fixed budget, how should it be split across venue types "
             "(restaurants / gyms / bars / waiting rooms) to maximize incremental "
             "foot traffic, accounting for each venue type's own diminishing-returns "
@@ -107,11 +120,19 @@ with tab_overview:
         )
     with col3:
         st.markdown(
-            "**Atmosphere's own revenue (buy-side of the network):**\n\n"
+            "**Q3 — Atmosphere's own revenue (buy-side, value):**\n\n"
             "Beyond the advertiser's questions, what should Atmosphere itself do — "
             "which existing venues are under-monetized relative to their own traffic "
             "and quality, and which prospective venues are worth prioritizing for "
             "network expansion?"
+        )
+    with col4:
+        st.markdown(
+            "**Q4 — Venue retention (buy-side, risk):**\n\n"
+            "Which existing venues are at risk of leaving the network, and what "
+            "ops-visible leading indicators (engagement trend, screen uptime, "
+            "complaints, competitor outreach) predict it — combined with Q3's "
+            "revenue into one value x risk priority for account teams."
         )
 
     st.divider()
@@ -131,11 +152,17 @@ with tab_overview:
         "calibrated response curves — not a greedy walk, because these S-shaped curves "
         "are not globally concave and a greedy heuristic measurably underperformed a "
         "naive baseline in an earlier version of this tool.\n"
-        "- **Venue revenue model**: a gradient-boosted-trees model predicts each venue's "
+        "- **Venue revenue model (Q3)**: a gradient-boosted-trees model predicts each venue's "
         "realized ad revenue from observable characteristics plus the RCT-calibrated "
         "per-exposure lift from the causal/MMM pipeline as a feature — one connected "
         "pipeline, not a separate silo. Out-of-fold residuals flag under-monetized "
-        "existing venues; the same model scores prospective venues for expansion priority."
+        "existing venues; the same model scores prospective venues for expansion priority.\n"
+        "- **Venue retention model (Q4)**: a separate gradient-boosted-trees classifier "
+        "predicts each venue's 90-day churn risk from ops-visible signals (engagement "
+        "trend, screen uptime, complaints, self-ad-slot utilization, competitor outreach, "
+        "tenure) plus realized ad revenue. 5-fold out-of-fold risk scores combine with Q3's "
+        "out-of-fold revenue into one value x risk priority quadrant — a closed-loop step, "
+        "not two disconnected reports."
     )
 
     st.divider()
@@ -153,7 +180,21 @@ with tab_overview:
         "- **The venue-revenue figures are synthetic**, generated with a known injected "
         "ad-rate-card, market-demand, and monetization-efficiency structure — same "
         "validate-before-trust pattern used throughout, not a claim about Atmosphere's "
-        "real rate card or actual venue economics."
+        "real rate card or actual venue economics.\n"
+        "- **The venue-retention figures are synthetic too** — illustrative churn-hazard, "
+        "competitive-pressure-geo, and engagement-signal parameters, not researched real "
+        "attrition benchmarks.\n"
+        "- **`realized_ad_revenue`'s importance in the churn model is a confound, not a "
+        "causal driver** — venue_type drives both a venue's ad-revenue rate and its baseline "
+        "churn hazard, so the two share a common cause rather than one causing the other. "
+        "Flagged explicitly rather than glossed over.\n"
+        "- **`geo_cluster` is deliberately excluded from the retention model's features** "
+        "(unlike the revenue model) — with only ~20 venues per cluster, that 20-level "
+        "categorical measurably hurt held-out AUC on this much sparser, noisier binary "
+        "target; a documented small-sample tradeoff, not an oversight.\n"
+        "- **No prospect-side retention model** — churn risk is only modeled for existing "
+        "venues with an observed relationship history; a new prospect has no tenure or "
+        "engagement signal yet, so retention scoring is scoped out for that scenario."
     )
 
 # ---------------------------------------------------------------------------
@@ -449,3 +490,111 @@ with tab_revenue:
         .style.format({"Predicted revenue ($/wk)": "${:,.0f}"}),
         width='stretch',
     )
+
+# ---------------------------------------------------------------------------
+# TAB 6: Venue Retention
+# ---------------------------------------------------------------------------
+with tab_retention:
+    rv = retention_eval.iloc[0]
+    st.subheader("Predicting 90-day churn risk from ops-visible signals")
+    st.caption(
+        "A gradient-boosted-trees classifier (venue_type, traffic tier, tenure, engagement "
+        "trend, screen uptime, complaints, self-ad-slot utilization, competitor outreach, "
+        "realized ad revenue) predicts each venue's probability of leaving the network in the "
+        "next quarter — the other half of 'what makes a venue valuable and what puts it at "
+        "risk.' geo_cluster is deliberately excluded here (see Honest scope, Overview tab)."
+    )
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Held-out AUC", f"{rv['auc_test']:.2f}")
+    m2.metric("Held-out PR-AUC", f"{rv['pr_auc_test']:.2f}")
+    m3.metric("Held-out Brier score", f"{rv['brier_test']:.3f}")
+    m4.metric("Corr. w/ latent true risk", f"{rv['predicted_vs_true_risk_corr']:.2f}")
+    st.caption(
+        "This synthetic demo injects a latent 'true 90-day churn risk' the model is never "
+        "trained on, purely to confirm the model's predicted risk recovers it despite training "
+        "only on a noisy churned/not-churned outcome — same ground-truth-first discipline used "
+        "throughout this project. The model is deliberately shallow (max_depth=1) and drops "
+        "geo_cluster: with only ~400 venues, that measurably improved held-out AUC over a "
+        "deeper, fuller-feature model (~0.57 -> ~0.65) — a documented small-sample tradeoff, "
+        "not an oversight."
+    )
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown("**Calibration: predicted vs. actual churn rate, by predicted-risk quintile (test set)**")
+        fig7, ax7 = plt.subplots(figsize=(5.5, 3.5))
+        ax7.plot(retention_calib["decile"], retention_calib["predicted_mean"], marker="o",
+                 label="Predicted", color="#4C72B0")
+        ax7.plot(retention_calib["decile"], retention_calib["actual_rate"], marker="o",
+                 label="Actual", color="#C44E52")
+        ax7.set_xlabel("Predicted-risk quintile")
+        ax7.set_ylabel("Churn rate")
+        ax7.legend(fontsize=8)
+        st.pyplot(fig7)
+    with col_b:
+        st.markdown("**Feature importance (permutation, held-out test set) — the 'leading indicators'**")
+        fig8, ax8 = plt.subplots(figsize=(5.5, 3.5))
+        imp2 = retention_importance.sort_values("importance_mean")
+        ax8.barh(imp2["feature"], imp2["importance_mean"], color="#C44E52")
+        ax8.set_xlabel("Mean AUC drop when permuted")
+        st.pyplot(fig8)
+        st.caption(
+            "screen_uptime_pct leads, followed by realized_ad_revenue — the latter is a real "
+            "confound (venue_type drives both revenue rate and churn hazard), not a causal "
+            "driver of churn. Flagged explicitly rather than presented as a clean signal."
+        )
+
+    st.divider()
+    st.subheader("At-risk venues")
+    st.caption(
+        f"Flags use 5-fold out-of-fold predictions (no venue is ever scored by a model that saw "
+        f"its own outcome). The {int(rv['flagged_venues'])} highest-risk venues carry a "
+        f"{rv['flagged_latent_gap_rate']*100:.0f}% latent risk-factor rate (competitive-pressure "
+        f"market or relationship-execution gap) vs. a {rv['population_latent_gap_rate']*100:.0f}% "
+        "rate network-wide — strong enrichment in the flagged tail."
+    )
+    at_risk_display = at_risk_flags.copy()
+    at_risk_display["venue_type"] = at_risk_display["venue_type"].map(VENUE_TYPE_LABELS)
+    st.dataframe(
+        at_risk_display[["venue_id", "venue_type", "geo_cluster", "tenure_months",
+                          "churn_risk_oof", "competitive_pressure_market", "relationship_execution_gap"]]
+        .rename(columns={
+            "venue_id": "Venue ID", "venue_type": "Venue type", "geo_cluster": "Geo cluster",
+            "tenure_months": "Tenure (months)", "churn_risk_oof": "Churn risk (OOF)",
+            "competitive_pressure_market": "Competitive-pressure market (latent)",
+            "relationship_execution_gap": "Relationship execution gap (latent)",
+        })
+        .style.format({"Churn risk (OOF)": "{:.2f}", "Tenure (months)": "{:.0f}"}),
+        width='stretch',
+    )
+
+    st.divider()
+    st.subheader("Priority quadrant — Q3 revenue x Q4 churn risk")
+    st.caption(
+        "A closed-loop step: this model's out-of-fold churn risk combined with the venue "
+        "revenue model's out-of-fold predicted revenue, median-split into four quadrants — "
+        "one decision framework for account teams instead of two separate reports."
+    )
+    quad_counts = priority_quadrant["priority_quadrant"].value_counts().reset_index()
+    quad_counts.columns = ["Priority quadrant", "Venue count"]
+    col_c, col_d = st.columns([1, 1.4])
+    with col_c:
+        st.dataframe(quad_counts, width='stretch', hide_index=True)
+    with col_d:
+        fig9, ax9 = plt.subplots(figsize=(5.5, 3.8))
+        quad_colors = {
+            "Save now (high value, high risk)": "#C44E52",
+            "Protect (high value, low risk)": "#55A868",
+            "Low priority (low value, high risk)": "#8172B2",
+            "Monitor (low value, low risk)": "#8C8C8C",
+        }
+        for q, sub in priority_quadrant.groupby("priority_quadrant"):
+            ax9.scatter(sub["value_metric"], sub["churn_risk_oof"], label=q,
+                        color=quad_colors.get(q, "#4C72B0"), alpha=0.7, s=25)
+        ax9.axvline(priority_quadrant["value_metric"].median(), color="black", linestyle=":", linewidth=1)
+        ax9.axhline(priority_quadrant["churn_risk_oof"].median(), color="black", linestyle=":", linewidth=1)
+        ax9.set_xlabel("Value (predicted revenue, OOF)")
+        ax9.set_ylabel("Churn risk (OOF)")
+        ax9.legend(fontsize=7, loc="upper left")
+        st.pyplot(fig9)
