@@ -1,0 +1,15 @@
+{
+  "rng_seed": 20260904,
+  "competitive_pressure_geos": [
+    12,
+    14,
+    16
+  ],
+  "base_hazard_by_venue_type": {
+    "restaurant": 0.1,
+    "gym": 0.05,
+    "bar": 0.12,
+    "waiting_room": 0.04
+  },
+  "note": "true_churn_risk_90d (incl. competitive_pressure_market / relationship_execution_gap flags) is latent ground truth for validating venue_retention_model.py's out-of-sample recovery only -- the model itself is never given these columns, only churned_next_quarter and the observable engagement/ops signals."
+}
