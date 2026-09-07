@@ -23,12 +23,19 @@ business acts on"), this script also combines its own OOF churn-risk score
 with venue_revenue_model.py's OOF revenue -- producing a value x risk
 priority quadrant (save-now / protect / low-priority / monitor) rather than
 leaving revenue and retention as two disconnected reports.
+
+One more step from rank to reason: for every "save now" and flagged venue,
+a SHAP decomposition (same OOF discipline -- each venue explained by the
+fold model that never trained on it) names the specific feature driving
+THAT venue's risk up, mapped to a concrete recommended action -- not just
+a shared rank order. See compute_oof_shap_for_subset() / derive_driver_and_action().
 """
 
 import os
 
 import numpy as np
 import pandas as pd
+import shap
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
@@ -160,6 +167,158 @@ def build_at_risk_flags(ret, oof_pred):
     return flags, validation_row, out
 
 
+# ---------------------------------------------------------------------------
+# Per-venue driver attribution (SHAP) -- turns "who is flagged" into "why,
+# and what should the account team actually do about it."
+# ---------------------------------------------------------------------------
+# The global permutation importance above answers "which feature matters on
+# average across all venues" -- it can't say why any ONE venue is flagged.
+# SHAP decomposes each venue's own predicted risk into each feature's own
+# contribution, so a specific flagged venue gets a specific reason, not just
+# a rank position.
+#
+# HistGradientBoostingClassifier's categorical_features="from_dtype" path
+# isn't supported by shap.TreeExplainer (it errors trying numeric ops on the
+# raw category strings), so this uses shap's model-agnostic Permutation
+# explainer against a label-encoded copy of the categorical columns, decoded
+# back to real categories inside the wrapped predict function below --
+# verified against SHAP's own additivity identity (sum of contributions +
+# base value == the model's actual predicted probability) before trusting it.
+#
+# Kept to the same OOF discipline as the rest of this model: each venue's
+# SHAP values come from the fold model that did NOT see it during training,
+# using the identical 5-fold split as out_of_fold_predictions().
+#
+# Computed only for venues actually in scope for account-team outreach (the
+# top-N at-risk flags + the "Save now" quadrant), not the full population --
+# those are the venues someone would actually act on, and it keeps this a
+# fast, targeted addition rather than a blanket ~400-venue computation
+# nobody asked for.
+
+ACTION_MAP = {
+    "screen_uptime_pct": (
+        "Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose "
+        "a hardware or network fault before the venue notices degraded service."
+    ),
+    "competitor_outreach_flag": (
+        "Commercial retention - a competitor has already made contact; have the account manager "
+        "open a renewal/renegotiation conversation before it becomes a formal offer."
+    ),
+    "engagement_trend_90d": (
+        "Content/placement review - on-screen engagement is trending down; review content mix "
+        "or ad frequency with the venue rather than waiting for a complaint."
+    ),
+    "complaint_count_90d": (
+        "Service recovery - recent complaints on file; account manager to follow up directly "
+        "on the open issue(s)."
+    ),
+    "self_ad_promo_utilization": (
+        "Platform engagement check-in - the venue is under-using its own self-serve promo slots; "
+        "a walkthrough of underused features can re-engage them."
+    ),
+}
+# Features that are structural or a known confound (see README's Honest scope) rather
+# than an ops-actionable signal -- never turned into a fabricated "go do X" action.
+NON_ACTIONABLE_NOTE = {
+    "realized_ad_revenue": "a venue_type confound, not a causal churn driver -- see Honest scope",
+    "tenure_months": "structural (not something ops can act on directly)",
+    "venue_type": "structural",
+    "traffic_tier": "structural",
+}
+FALLBACK_ACTION = (
+    "No single ops-actionable signal dominates - risk appears tied to structural "
+    "characteristics or the revenue confound; recommend a manual account review rather "
+    "than a scripted outreach."
+)
+
+
+def _shap_predict_fn(model, cat_maps):
+    """Wrap model.predict_proba so shap's Permutation explainer can perturb a
+    label-encoded numeric matrix (its masker requires numeric arrays), while
+    the model itself still sees real pandas categorical dtype columns, which
+    categorical_features="from_dtype" requires at predict time."""
+    def f(data):
+        df = pd.DataFrame(np.asarray(data), columns=FEATURES)
+        for c in CATEGORICAL:
+            codes = df[c].round().astype(int).clip(0, len(cat_maps[c]) - 1)
+            df[c] = codes.map(cat_maps[c]).astype("category")
+            df[c] = df[c].cat.set_categories(list(cat_maps[c].values()))
+        df["competitor_outreach_flag"] = df["competitor_outreach_flag"].round().astype(int)
+        for c in FEATURES:
+            if c not in CATEGORICAL:
+                df[c] = df[c].astype(float)
+        return model.predict_proba(df)[:, 1]
+    return f
+
+
+def compute_oof_shap_for_subset(ret, venue_ids, background_n=30):
+    """SHAP contributions for just `venue_ids`, each explained by the fold
+    model that never trained on it -- the identical KFold split used by
+    out_of_fold_predictions(). Returns venue_id + one column per feature
+    (its SHAP contribution to that venue's churn_risk_oof) + base_value."""
+    X = _prep_features(ret[FEATURES])
+    y = ret[TARGET].astype(int).values
+
+    cat_maps = {c: dict(enumerate(X[c].cat.categories)) for c in CATEGORICAL}
+    X_coded = X.copy()
+    for c in CATEGORICAL:
+        X_coded[c] = X_coded[c].cat.codes.astype(float)
+    X_coded = X_coded.astype(float)
+
+    wanted_ids = set(venue_ids)
+    target_mask = ret["venue_id"].isin(wanted_ids).values
+
+    kf = KFold(n_splits=N_FOLDS, shuffle=True, random_state=RANDOM_STATE)
+    rows = []
+    for train_idx, val_idx in kf.split(X):
+        wanted = [i for i in val_idx if target_mask[i]]
+        if not wanted:
+            continue
+        model = _make_model()
+        model.fit(X.iloc[train_idx], y[train_idx])
+        f = _shap_predict_fn(model, cat_maps)
+        bg = X_coded.iloc[train_idx].sample(min(background_n, len(train_idx)), random_state=RANDOM_STATE)
+        explainer = shap.explainers.Permutation(f, bg, seed=RANDOM_STATE)
+        sv = explainer(X_coded.iloc[wanted])
+        for local_i, orig_i in enumerate(wanted):
+            row = {"venue_id": ret.iloc[orig_i]["venue_id"], "base_value": float(sv.base_values[local_i])}
+            row.update({feat: float(sv.values[local_i, j]) for j, feat in enumerate(FEATURES)})
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def derive_driver_and_action(shap_row):
+    """From one venue's per-feature SHAP contributions, name the feature
+    actually driving its risk UP -- not just the largest |SHAP| value, since
+    a strongly protective feature isn't a reason to act -- and translate it
+    into a recommended action where that top driver is ops-actionable."""
+    contributions = {f: shap_row[f] for f in FEATURES}
+    positive = {f: v for f, v in contributions.items() if v > 0}
+    if not positive:
+        return {
+            "top_model_driver": None, "top_model_driver_shap": None,
+            "recommended_action_driver": None,
+            "recommended_action": "No feature pushes this venue's risk meaningfully above baseline.",
+        }
+
+    top_overall = max(positive, key=positive.get)
+    actionable_positive = {f: v for f, v in positive.items() if f in ACTION_MAP}
+    if actionable_positive:
+        top_actionable = max(actionable_positive, key=actionable_positive.get)
+        action_text = ACTION_MAP[top_actionable]
+    else:
+        top_actionable = None
+        note = NON_ACTIONABLE_NOTE.get(top_overall, "not mapped to an action")
+        action_text = f"{FALLBACK_ACTION} (top model driver here is {top_overall} - {note}.)"
+
+    return {
+        "top_model_driver": top_overall,
+        "top_model_driver_shap": positive[top_overall],
+        "recommended_action_driver": top_actionable,
+        "recommended_action": action_text,
+    }
+
+
 def build_priority_quadrant(retention_out, econ):
     """Closed-loop step: combine this model's OOF churn risk with
     venue_revenue_model.py's OOF revenue prediction into one value x risk
@@ -201,6 +360,22 @@ def main():
     eval_row = pd.concat([eval_row, validation_row], axis=1)
     quadrant = build_priority_quadrant(oof_full, econ)
 
+    # Per-venue driver + recommended action, for the venues account teams
+    # would actually work through: the flagged at-risk list, plus the
+    # "Save now" (high value, high risk) quadrant.
+    save_now_ids = quadrant.loc[
+        quadrant["priority_quadrant"] == "Save now (high value, high risk)", "venue_id"
+    ]
+    driver_scope_ids = pd.concat([flags["venue_id"], save_now_ids]).unique()
+    print(f"\nComputing SHAP driver attribution for {len(driver_scope_ids)} venues in outreach scope...")
+    shap_df = compute_oof_shap_for_subset(ret, driver_scope_ids)
+    drivers = pd.DataFrame(
+        [dict(derive_driver_and_action(r), venue_id=r["venue_id"]) for _, r in shap_df.iterrows()]
+    )
+
+    flags = flags.merge(drivers, on="venue_id", how="left")
+    quadrant = quadrant.merge(drivers, on="venue_id", how="left")
+
     eval_row.to_csv(os.path.join(OUT_TABLES, "venue_retention_model_eval.csv"), index=False)
     calib_table.to_csv(os.path.join(OUT_TABLES, "venue_retention_calibration.csv"), index=False)
     importance.to_csv(os.path.join(OUT_TABLES, "venue_retention_feature_importance.csv"), index=False)
@@ -212,11 +387,13 @@ def main():
     print(eval_row.T)
     print("\n=== Feature importance (permutation, test set) -- the 'leading indicators' ===")
     print(importance.to_string(index=False))
-    print(f"\n=== Top {N_FLAGS} at-risk venues (OOF) ===")
+    print(f"\n=== Top {N_FLAGS} at-risk venues (OOF), with per-venue driver + recommended action ===")
     print(flags[["venue_id", "venue_type", "geo_cluster", "churn_risk_oof",
-                 "competitive_pressure_market", "relationship_execution_gap"]].to_string(index=False))
+                 "top_model_driver", "recommended_action_driver"]].to_string(index=False))
     print("\n=== Priority quadrant (value x risk) ===")
     print(quadrant["priority_quadrant"].value_counts())
+    print("\n=== Recommended-action driver distribution, 'Save now' + flagged venues ===")
+    print(drivers["recommended_action_driver"].value_counts(dropna=False))
 
 
 if __name__ == "__main__":
