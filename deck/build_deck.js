@@ -67,7 +67,7 @@ function addFooter(slide, pageLabel) {
     { x: 0.9, y: 4.75, w: 9.8, h: 0.9, fontSize: 15, color: ICE, fontFace: "Calibri", italic: true }
   );
   slide.addText("Yidan Hu", {
-    x: 0.9, y: 7.05, w: 4, h: 0.35, fontSize: 12, color: ICE, fontFace: "Calibri",
+    x: 0.9, y: 6.55, w: 4, h: 0.35, fontSize: 12, color: ICE, fontFace: "Calibri",
   });
 }
 
