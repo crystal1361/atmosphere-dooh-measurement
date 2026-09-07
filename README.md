@@ -46,7 +46,8 @@ in-browser if you'd rather page through it there.)
 <img src="deck/slides/slide-11.jpg" width="800"><br>
 <img src="deck/slides/slide-12.jpg" width="800"><br>
 <img src="deck/slides/slide-13.jpg" width="800"><br>
-<img src="deck/slides/slide-14.jpg" width="800">
+<img src="deck/slides/slide-14.jpg" width="800"><br>
+<img src="deck/slides/slide-15.jpg" width="800">
 </p>
 
 ## Design
@@ -72,6 +73,13 @@ into the models that scale it across the whole network:
 - **MMM calibration matters**: the naive, uncalibrated MMM understated true incremental
   lift by **100–165%** for 3 of 4 venue types before RCT calibration
   (`outputs/tables/mmm_params.csv`).
+- **MMM robustness to competing media**: a synthetic overlay (correlation 0.35 with
+  Atmosphere's own exposure ramp — moderate, not a worst case) shows a naive, confound-blind
+  MMM swinging **2–4×** off for 3 of 4 venue types; the RCT estimate shifts by **0.00** under
+  the identical shock, since it hits both arms equally and a randomized comparison is
+  mechanically immune to it (`outputs/tables/mmm_confounder_ablation.csv`, see
+  [Honest scope](#honest-scope) — this is a labeled sensitivity overlay, not a change to the
+  core synthetic ground truth).
 - **Budget allocator**: the exact-DP allocation beats a naive equal-split baseline by
   **+48.6%** at a $20K weekly budget, narrowing to +2.4% at $100K — the optimizer's edge
   is largest exactly when budget is scarce and allocation decisions matter most
@@ -117,6 +125,7 @@ src/
   causal_rct.py                # RCT geo-holdout: balance check + effect estimation
   causal_synthetic_control.py  # synthetic control: donor weighting + placebo test
   mmm_model.py                  # adstock/saturation MMM + RCT calibration
+  mmm_confounder_check.py       # sensitivity overlay: competing-media confound bias vs. RCT robustness
   budget_allocator.py           # exact DP budget allocation across venue types
   venue_economics_data.py       # synthetic venue revenue economics + prospect venues
   venue_revenue_model.py        # GBT revenue model, OOF under-monetization flags, prospect ranking
@@ -146,12 +155,15 @@ python3 src/data_generation.py            # 1. generate synthetic data + ground 
 python3 src/causal_rct.py                  # 2. RCT geo-holdout effects (high confidence)
 python3 src/causal_synthetic_control.py    # 3. synthetic control effects (moderate confidence)
 python3 src/mmm_model.py                    # 4. MMM, calibrated against the RCT
-python3 src/budget_allocator.py             # 5. budget allocation examples (CLI)
-python3 src/venue_economics_data.py         # 6. synthetic venue revenue economics + prospects
-python3 src/venue_revenue_model.py          # 7. venue revenue model, OOF flags, prospect ranking
-python3 src/venue_retention_data.py         # 8. synthetic venue engagement/ops signals + churn outcome
-python3 src/venue_retention_model.py        # 9. retention model, OOF at-risk flags, priority quadrant
-                                             #    (reads step 7's OOF output -- run venue_revenue_model.py first)
+python3 src/mmm_confounder_check.py         # 5. sensitivity check: competing-media confound vs. RCT robustness
+                                             #    (reads step 4's mmm_params.csv -- run mmm_model.py first)
+python3 src/budget_allocator.py             # 6. budget allocation examples (CLI)
+python3 src/venue_economics_data.py         # 7. synthetic venue revenue economics + prospects
+python3 src/venue_revenue_model.py          # 8. venue revenue model, OOF flags, prospect ranking
+python3 src/venue_retention_data.py         # 9. synthetic venue engagement/ops signals + churn outcome
+python3 src/venue_retention_model.py        # 10. retention model, OOF at-risk flags, priority quadrant,
+                                             #     per-venue SHAP driver + recommended action
+                                             #     (reads step 8's OOF output -- run venue_revenue_model.py first)
 
 streamlit run dashboard/streamlit_app.py    # interactive dashboard
 ```
