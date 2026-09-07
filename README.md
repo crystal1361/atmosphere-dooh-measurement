@@ -96,6 +96,19 @@ into the models that scale it across the whole network:
 "save now" flag, rather than sales/ops reading a revenue report and a churn report
 separately and reconciling them by hand.
 
+**From a rank to a reason**: global permutation importance says which feature matters
+*on average* — it can't say why any one venue is flagged. For every "save now" and
+flagged venue, a SHAP decomposition (from the fold model that never trained on that
+venue, keeping the same OOF discipline as the risk score itself) names the specific
+feature actually pushing *that* venue's risk up, mapped to a concrete action — a
+technical dispatch for a screen-uptime fault, an account-manager retention call for a
+known competitor contact, a content review for declining engagement — rather than a
+generic "reach out." `realized_ad_revenue` and other structural/confound features are
+deliberately never turned into a fabricated action (see
+[Honest scope](#honest-scope)); those venues fall back to a flagged "manual review"
+note instead. See `top_model_driver` / `recommended_action` in
+`outputs/tables/venue_at_risk_flags.csv` and `venue_priority_quadrant.csv`.
+
 ## Repo layout
 
 ```
@@ -127,7 +140,7 @@ deck/
 ## Running it
 
 ```bash
-pip install pandas numpy scipy scikit-learn statsmodels streamlit
+pip install pandas numpy scipy scikit-learn statsmodels streamlit shap
 
 python3 src/data_generation.py            # 1. generate synthetic data + ground truth
 python3 src/causal_rct.py                  # 2. RCT geo-holdout effects (high confidence)
