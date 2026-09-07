@@ -1,21 +1,21 @@
-venue_id,venue_type,geo_cluster,traffic_tier,tenure_months,churned_next_quarter,competitive_pressure_market,relationship_execution_gap,churn_risk_oof
-281,bar,17,high,42.0,False,False,True,0.6016948436053919
-200,bar,16,low,32.0,False,True,True,0.5469594967205536
-12,restaurant,14,low,36.0,True,True,True,0.518023410424601
-244,bar,12,high,45.0,False,True,False,0.5150367056876507
-73,restaurant,5,high,34.0,False,False,True,0.5019057355637561
-89,restaurant,13,low,22.0,False,False,True,0.48386869052962195
-20,restaurant,4,low,19.0,False,False,True,0.483175438013966
-49,restaurant,14,low,27.0,True,True,True,0.47694356168513163
-235,bar,12,high,35.0,False,True,False,0.4762510758056011
-203,bar,14,high,28.0,False,True,False,0.45874580025236633
-38,restaurant,16,low,17.0,True,True,True,0.45423326613196247
-291,bar,1,high,17.0,True,False,True,0.45423326613196247
-201,bar,12,low,44.0,False,True,True,0.4521065059154363
-162,gym,6,low,12.0,False,False,True,0.4391389430457339
-229,bar,16,high,15.0,False,True,False,0.4358157531383939
-116,gym,17,high,12.0,True,False,True,0.43057385754055005
-5,restaurant,16,low,3.0,True,True,True,0.4256985751889979
-81,restaurant,5,high,3.0,False,False,True,0.4256985751889979
-280,bar,15,low,8.0,False,False,True,0.42248048177517483
-96,restaurant,7,high,17.0,False,False,True,0.4216896270138518
+venue_id,venue_type,geo_cluster,traffic_tier,tenure_months,churned_next_quarter,competitive_pressure_market,relationship_execution_gap,churn_risk_oof,top_model_driver,top_model_driver_shap,recommended_action_driver,recommended_action
+281,bar,17,high,42.0,False,False,True,0.6016948436053919,engagement_trend_90d,0.15734440161620492,engagement_trend_90d,Content/placement review - on-screen engagement is trending down; review content mix or ad frequency with the venue rather than waiting for a complaint.
+200,bar,16,low,32.0,False,True,True,0.5469594967205536,engagement_trend_90d,0.1521396705474414,engagement_trend_90d,Content/placement review - on-screen engagement is trending down; review content mix or ad frequency with the venue rather than waiting for a complaint.
+12,restaurant,14,low,36.0,True,True,True,0.518023410424601,screen_uptime_pct,0.1730163383106325,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+244,bar,12,high,45.0,False,True,False,0.5150367056876507,engagement_trend_90d,0.1496680265910931,engagement_trend_90d,Content/placement review - on-screen engagement is trending down; review content mix or ad frequency with the venue rather than waiting for a complaint.
+73,restaurant,5,high,34.0,False,False,True,0.5019057355637561,complaint_count_90d,0.13253288779120392,complaint_count_90d,Service recovery - recent complaints on file; account manager to follow up directly on the open issue(s).
+89,restaurant,13,low,22.0,False,False,True,0.48386869052962195,screen_uptime_pct,0.1361837605648194,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+20,restaurant,4,low,19.0,False,False,True,0.483175438013966,screen_uptime_pct,0.1685757439274359,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+49,restaurant,14,low,27.0,True,True,True,0.47694356168513163,screen_uptime_pct,0.13552625262467127,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+235,bar,12,high,35.0,False,True,False,0.4762510758056011,screen_uptime_pct,0.16760708740400948,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+203,bar,14,high,28.0,False,True,False,0.45874580025236633,engagement_trend_90d,0.10045374707511791,engagement_trend_90d,Content/placement review - on-screen engagement is trending down; review content mix or ad frequency with the venue rather than waiting for a complaint.
+38,restaurant,16,low,17.0,True,True,True,0.45423326613196247,screen_uptime_pct,0.1468939440903264,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+291,bar,1,high,17.0,True,False,True,0.45423326613196247,screen_uptime_pct,0.14683438151044892,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+201,bar,12,low,44.0,False,True,True,0.4521065059154363,screen_uptime_pct,0.14681571658004458,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+162,gym,6,low,12.0,False,False,True,0.4391389430457339,screen_uptime_pct,0.13917138116248914,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+229,bar,16,high,15.0,False,True,False,0.4358157531383939,complaint_count_90d,0.12669256757114192,complaint_count_90d,Service recovery - recent complaints on file; account manager to follow up directly on the open issue(s).
+116,gym,17,high,12.0,True,False,True,0.43057385754055005,screen_uptime_pct,0.14394980582412026,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+5,restaurant,16,low,3.0,True,True,True,0.4256985751889979,screen_uptime_pct,0.15755949752477577,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+81,restaurant,5,high,3.0,False,False,True,0.4256985751889979,screen_uptime_pct,0.15772596175708858,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
+280,bar,15,low,8.0,False,False,True,0.42248048177517483,complaint_count_90d,0.12526295106576832,complaint_count_90d,Service recovery - recent complaints on file; account manager to follow up directly on the open issue(s).
+96,restaurant,7,high,17.0,False,False,True,0.4216896270138518,screen_uptime_pct,0.14282315874131715,screen_uptime_pct,Technical/ops outreach - screen uptime is depressed; dispatch field ops to diagnose a hardware or network fault before the venue notices degraded service.
