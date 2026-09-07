@@ -314,27 +314,32 @@
       {
         "venue_id": 281,
         "venue_type": "bar",
-        "churn_risk_oof": 0.602
+        "churn_risk_oof": 0.602,
+        "top_driver": "engagement_trend_90d"
       },
       {
         "venue_id": 200,
         "venue_type": "bar",
-        "churn_risk_oof": 0.547
+        "churn_risk_oof": 0.547,
+        "top_driver": "engagement_trend_90d"
       },
       {
         "venue_id": 12,
         "venue_type": "restaurant",
-        "churn_risk_oof": 0.518
+        "churn_risk_oof": 0.518,
+        "top_driver": "screen_uptime_pct"
       },
       {
         "venue_id": 244,
         "venue_type": "bar",
-        "churn_risk_oof": 0.515
+        "churn_risk_oof": 0.515,
+        "top_driver": "engagement_trend_90d"
       },
       {
         "venue_id": 73,
         "venue_type": "restaurant",
-        "churn_risk_oof": 0.502
+        "churn_risk_oof": 0.502,
+        "top_driver": "complaint_count_90d"
       }
     ],
     "quadrant_counts": {

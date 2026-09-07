@@ -655,18 +655,30 @@ function addFooter(slide, pageLabel) {
     title: "Feature importance (permutation, test set) — leading indicators", showTitle: true, titleFontSize: 11, titleColor: NAVY,
   });
 
-  // top at-risk venues + priority quadrant (right)
+  // top at-risk venues (with SHAP-derived driver + action) + priority quadrant (right)
+  // DRIVER_TAG: each flagged venue's top SHAP-attributed feature, translated to the
+  // short action an account team would actually take -- not just a rank position.
+  // "Which feature matters on average" (the chart on the left) can't say why any ONE
+  // venue is flagged; this is that per-venue answer.
+  const DRIVER_TAG = {
+    engagement_trend_90d: "engagement declining → content/placement review",
+    screen_uptime_pct: "uptime issue → dispatch technical support",
+    complaint_count_90d: "complaint(s) open → account manager follow-up",
+    competitor_outreach_flag: "competitor contact → retention conversation",
+    self_ad_promo_utilization: "low platform use → feature walkthrough",
+  };
   let ty2 = 3.15;
-  slide.addText(`Top at-risk venues (of ${p3.n_flagged} flagged, by OOF risk)`, { x: 6.85, y: ty2, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
-  ty2 += 0.36;
-  p3.top_at_risk.slice(0, 4).forEach((f) => {
-    slide.addText(`Venue #${f.venue_id} (${VTYPE_LABEL[f.venue_type]})`, { x: 6.85, y: ty2, w: 4.0, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
-    slide.addText(`${(f.churn_risk_oof * 100).toFixed(0)}%`, { x: 10.9, y: ty2, w: 1.85, h: 0.3, fontSize: 10, bold: true, color: "B8500A", fontFace: "Calibri", align: "right" });
-    ty2 += 0.32;
+  slide.addText(`Top at-risk venues (of ${p3.n_flagged} flagged, by OOF risk)`, { x: 6.85, y: ty2, w: 5.9, h: 0.28, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
+  ty2 += 0.32;
+  p3.top_at_risk.slice(0, 3).forEach((f) => {
+    slide.addText(`Venue #${f.venue_id} (${VTYPE_LABEL[f.venue_type]})`, { x: 6.85, y: ty2, w: 4.35, h: 0.24, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(`${(f.churn_risk_oof * 100).toFixed(0)}%`, { x: 11.2, y: ty2, w: 1.55, h: 0.24, fontSize: 10, bold: true, color: "B8500A", fontFace: "Calibri", align: "right" });
+    slide.addText(DRIVER_TAG[f.top_driver] || f.top_driver, { x: 6.85, y: ty2 + 0.22, w: 5.9, h: 0.22, fontSize: 9, italic: true, color: "8A4B0A", fontFace: "Calibri" });
+    ty2 += 0.46;
   });
-  ty2 += 0.2;
-  slide.addText("Priority quadrant (Q3 revenue × Q4 risk)", { x: 6.85, y: ty2, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
-  ty2 += 0.36;
+  ty2 += 0.1;
+  slide.addText("Priority quadrant (Q3 revenue × Q4 risk)", { x: 6.85, y: ty2, w: 5.9, h: 0.26, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
+  ty2 += 0.3;
   const QUAD_COLOR = {
     "Save now (high value, high risk)": "B8500A",
     "Protect (high value, low risk)": GOOD_GREEN,
@@ -674,14 +686,14 @@ function addFooter(slide, pageLabel) {
     "Monitor (low value, low risk)": "5B6178",
   };
   Object.entries(p3.quadrant_counts).forEach(([label, count]) => {
-    slide.addText(label, { x: 6.85, y: ty2, w: 4.4, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
-    slide.addText(String(count), { x: 11.15, y: ty2, w: 1.6, h: 0.3, fontSize: 10, bold: true, color: QUAD_COLOR[label] || NAVY, fontFace: "Calibri", align: "right" });
-    ty2 += 0.32;
+    slide.addText(label, { x: 6.85, y: ty2, w: 4.4, h: 0.26, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(String(count), { x: 11.15, y: ty2, w: 1.6, h: 0.26, fontSize: 10, bold: true, color: QUAD_COLOR[label] || NAVY, fontFace: "Calibri", align: "right" });
+    ty2 += 0.27;
   });
 
   slide.addText(
-    "Flags come from 5-fold out-of-fold predictions. AUC/PR-AUC look modest next to the revenue model's R² — but an oracle with the true latent risk still only scores 0.73 AUC, so 0.65 is near this problem's honest ceiling. realized_ad_revenue's importance is a venue_type confound, not a causal driver of churn.",
-    { x: 0.6, y: 6.65, w: 12.1, h: 0.55, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+    "Flags come from 5-fold OOF predictions; AUC/PR-AUC read modest next to the revenue model's R² only because the oracle ceiling here is 0.73 AUC. realized_ad_revenue's importance is a venue_type confound, not a causal driver. Each \"Save now\" / flagged venue also carries a SHAP top driver (from the fold model that never saw it) mapped to a concrete action — technical dispatch, AM retention call, content review — not a generic \"reach out.\"",
+    { x: 0.6, y: 6.58, w: 12.1, h: 0.6, fontSize: 8.7, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
   );
   addFooter(slide, "Venue retention");
 }
