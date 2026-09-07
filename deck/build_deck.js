@@ -456,7 +456,57 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — Budget allocator
+// Slide 10 — MMM robustness check: competing media as a confounder
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("Robustness check: does competing media break this MMM?", {
+    x: 0.6, y: 0.45, w: 12.3, h: 0.65, fontSize: 24, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "A synthetic “other advertisers were busy too” shock, correlated with Atmosphere's own exposure ramp-up — layered onto the validated data as a labeled overlay, not a change to it.",
+    { x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri" }
+  );
+
+  const cc = DATA.mmm_confounder_check;
+  const ccRows = byOrder(cc.rows);
+  slide.addChart(pres.ChartType.bar, [
+    { name: "Naive MMM (blind to competing media)", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.beta_naive_confound_blind) },
+    { name: "Confound-aware MMM (controls for it)", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.beta_confound_aware) },
+    { name: "True max lift", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.true_max_lift_ground_truth) },
+  ], {
+    x: 0.6, y: 1.75, w: 7.6, h: 4.3,
+    barDir: "col", chartColors: ["C44E52", "55A868", AMBER], showLegend: true, legendPos: "b", legendFontSize: 9,
+    showValue: true, dataLabelFontSize: 8.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
+    catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
+    valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED,
+    valAxisTitle: "Max lift at saturation", showValAxisTitle: true, valAxisTitleFontSize: 10,
+    catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
+  });
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 8.5, y: 1.75, w: 4.23, h: 1.35, rectRadius: 0.08, fill: { color: "F5F7FC" }, line: { type: "none" } });
+  slide.addText("RCT estimate shift under the identical shock", { x: 8.7, y: 1.88, w: 3.85, h: 0.4, fontSize: 11, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("0.00", { x: 8.7, y: 2.25, w: 3.85, h: 0.65, fontSize: 32, bold: true, color: GOOD_GREEN, fontFace: "Calibri" });
+  slide.addText("every venue type — the shock hits both arms equally, so a randomized comparison is mechanically immune to it", {
+    x: 8.7, y: 2.88, w: 3.85, h: 0.2, fontSize: 8.7, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10,
+  });
+
+  slide.addText(
+    `Naive MMM, by contrast, swings from useful to actively misleading: for 3 of 4 venue types the confound-blind fit was off by 2–4× — even though the injected correlation between competing media and Atmosphere's own exposure ramp is only ${cc.corr_with_own_exposure} (moderate, not a worst case). Controlling for the confound (green) recovers this model's own uncalibrated baseline from the previous slide — still short of true max lift (orange) until the RCT-scale calibration from that same slide is applied on top.`,
+    { x: 8.5, y: 3.35, w: 4.23, h: 1.55, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 }
+  );
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 0.6, y: 6.22, w: 12.13, h: 0.78, rectRadius: 0.06, fill: { color: "FDF1E3" }, line: { type: "none" } });
+  slide.addText(
+    "Why this is scoped this way: deciding how an advertiser splits budget across Atmosphere + TV + social is the advertiser's/agency's call — Atmosphere has no visibility into competitors' channel data anyway. What Atmosphere's DS role should own is netting competing media OUT of its own causal read (the JD's own phrasing), which the RCT does by design and a single-channel MMM only does with an explicit control.",
+    { x: 0.8, y: 6.32, w: 11.75, h: 0.6, fontSize: 9.5, italic: true, color: "8A4B0A", fontFace: "Calibri", lineSpacing: 12 }
+  );
+  addFooter(slide, "Media-mix model — robustness");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 11 — Budget allocator
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -499,7 +549,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 11 — The other side of the business
+// Slide 12 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -550,7 +600,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — Venue revenue model results
+// Slide 13 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -616,7 +666,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 13 — Venue retention model results
+// Slide 14 — Venue retention model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -699,7 +749,7 @@ function addFooter(slide, pageLabel) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 14 — Closing / takeaways
+// Slide 15 — Closing / takeaways
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();

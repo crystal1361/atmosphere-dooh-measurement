@@ -97,6 +97,40 @@
       "true_max_lift_ground_truth": 9.0
     }
   ],
+  "mmm_confounder_check": {
+    "corr_with_own_exposure": 0.35,
+    "confound_effect_sd": 5.0,
+    "rows": [
+      {
+        "venue_type": "bar",
+        "beta_naive_confound_blind": 20.63,
+        "beta_confound_aware": 15.1,
+        "true_max_lift_ground_truth": 22.0,
+        "rct_shift_under_confounding": 0.0
+      },
+      {
+        "venue_type": "gym",
+        "beta_naive_confound_blind": 14.01,
+        "beta_confound_aware": 5.0,
+        "true_max_lift_ground_truth": 14.0,
+        "rct_shift_under_confounding": 0.0
+      },
+      {
+        "venue_type": "restaurant",
+        "beta_naive_confound_blind": 17.47,
+        "beta_confound_aware": 7.98,
+        "true_max_lift_ground_truth": 18.0,
+        "rct_shift_under_confounding": 0.0
+      },
+      {
+        "venue_type": "waiting_room",
+        "beta_naive_confound_blind": 17.94,
+        "beta_confound_aware": 3.76,
+        "true_max_lift_ground_truth": 9.0,
+        "rct_shift_under_confounding": 0.0
+      }
+    ]
+  },
   "budgets": [
     {
       "budget": 20000,
