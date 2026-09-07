@@ -66,6 +66,9 @@ function addFooter(slide, pageLabel) {
     "A causal measurement framework, calibrated media-mix model, budget optimizer, and venue revenue + retention models — built to answer the questions Atmosphere's advertising business and its own network economics run on.",
     { x: 0.9, y: 4.75, w: 9.8, h: 0.9, fontSize: 15, color: ICE, fontFace: "Calibri", italic: true }
   );
+  slide.addText("Yidan Hu", {
+    x: 0.9, y: 7.05, w: 4, h: 0.35, fontSize: 12, color: ICE, fontFace: "Calibri",
+  });
 }
 
 // ---------------------------------------------------------------------------
