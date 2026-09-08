@@ -375,9 +375,16 @@ function addStepTag(slide, label, color) {
     );
     ty += 0.42;
   });
+  slide.addText("Why 2/16 isn't a red flag", {
+    x: 8.1, y: ty + 0.3, w: 4.6, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria",
+  });
   slide.addText(
-    "Pre-treatment balance check: only 2 of 16 covariate × venue-type tests were significant at p≤0.05 — in line with what chance alone predicts. Randomization worked as designed, not assumed.",
-    { x: 8.1, y: ty + 0.3, w: 4.6, h: 1.6, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
+    "16 tests = 4 pre-treatment covariates (baseline traffic level, dwell time, screen count, audience quality) × 4 venue types. Only 2 came back significant at p≤0.05.",
+    { x: 8.1, y: ty + 0.65, w: 4.6, h: 0.85, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
+  );
+  slide.addText(
+    "If randomization is clean, the count of false positives across 16 independent tests follows Binomial(16, 0.05): mean 0.8, P(≥2) ≈ 19%. Two sits well inside that distribution's main mass — nowhere near a red-flag tail value like 8+. Randomization worked as designed, not assumed.",
+    { x: 8.1, y: ty + 1.55, w: 4.6, h: 1.5, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
   );
 
   addFooter(slide, "Causal measurement — RCT");
