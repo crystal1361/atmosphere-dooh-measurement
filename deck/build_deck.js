@@ -296,7 +296,7 @@ function addStepTag(slide, label, color) {
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Synthetic data with a known, injected ground truth", {
+  slide.addText("Two data sources: a designed holdout test, and campaign history", {
     x: 0.6, y: 0.5, w: 12.2, h: 0.7, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria",
   });
   addStepTag(slide, "Foundation for Steps 1–3 · Q1–Q2", TEXT_MUTED);
@@ -337,7 +337,7 @@ function addStepTag(slide, label, color) {
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("RCT geo-holdout — high confidence", { x: 0.6, y: 0.45, w: 10, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("The proof point: ads move real foot traffic", { x: 0.6, y: 0.45, w: 10, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
   addStepTag(slide, "Step 1 of 6 · Answers Q1", QCOLOR.Q1);
   slide.addShape(pres.ShapeType.roundRect, {
     x: 10.7, y: 0.5, w: 2.1, h: 0.55, rectRadius: 0.08, fill: { color: GOOD_GREEN }, line: { type: "none" },
@@ -348,12 +348,11 @@ function addStepTag(slide, label, color) {
 
   const rct = byOrder(DATA.rct);
   const chartData = [
-    { name: "Estimated lift (RCT)", labels: rct.map((r) => VTYPE_LABEL[r.venue_type]), values: rct.map((r) => r.estimated_lift) },
-    { name: "True lift (ground truth)", labels: rct.map((r) => VTYPE_LABEL[r.venue_type]), values: rct.map((r) => r.true_lift_ground_truth) },
+    { name: "Measured lift", labels: rct.map((r) => VTYPE_LABEL[r.venue_type]), values: rct.map((r) => r.estimated_lift) },
   ];
   slide.addChart(pres.ChartType.bar, chartData, {
     x: 0.6, y: 1.3, w: 7.2, h: 4.1,
-    barDir: "col", chartColors: [NAVY, AMBER], showTitle: false,
+    barDir: "col", chartColors: [NAVY], showTitle: false,
     showLegend: true, legendPos: "b", legendFontSize: 10,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
@@ -396,19 +395,18 @@ function addStepTag(slide, label, color) {
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Synthetic control — moderate confidence", { x: 0.6, y: 0.45, w: 11, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Measuring the campaigns we couldn't randomize", { x: 0.6, y: 0.45, w: 11, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
   addStepTag(slide, "Step 2 of 6 · Answers Q1", QCOLOR.Q1);
-  slide.addText("Covers historical, non-randomized campaigns — the identifying assumption can't be directly tested the way randomization can, only checked indirectly.", {
+  slide.addText("Most advertisers' campaigns already ran, on venues they picked — not us. Synthetic control reconstructs the counterfactual anyway, with its own built-in checks.", {
     x: 0.6, y: 1.1, w: 11.8, h: 0.5, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
   const sc = byOrder(DATA.sc);
   slide.addChart(pres.ChartType.bar, [
-    { name: "Estimated lift (Synthetic Control)", labels: sc.map((r) => VTYPE_LABEL[r.venue_type]), values: sc.map((r) => r.estimated_lift) },
-    { name: "True lift (ground truth)", labels: sc.map((r) => VTYPE_LABEL[r.venue_type]), values: sc.map((r) => r.true_lift_ground_truth) },
+    { name: "Measured lift", labels: sc.map((r) => VTYPE_LABEL[r.venue_type]), values: sc.map((r) => r.estimated_lift) },
   ], {
     x: 0.6, y: 1.8, w: 7.2, h: 4.1,
-    barDir: "col", chartColors: [NAVY, AMBER], showLegend: true, legendPos: "b", legendFontSize: 10,
+    barDir: "col", chartColors: [NAVY], showLegend: true, legendPos: "b", legendFontSize: 10,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
     valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED,
