@@ -869,6 +869,61 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
+// Slide 14a — Venue revenue model: what feeds in, and why this model
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("Venue revenue model: what feeds in, and why this model", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 23, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 5 setup · Answers Q3", QCOLOR.Q3);
+  slide.addText(
+    "Can this venue's own characteristics + a validated advertising effect predict what it actually earns — and surface who's under-monetized or high-potential?",
+    { x: 0.6, y: 1.1, w: 12, h: 0.45, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
+  );
+
+  // Left: model choice + target
+  slide.addText("Model: HistGradientBoostingRegressor (sklearn)", {
+    x: 0.6, y: 1.8, w: 5.9, h: 0.55, fontSize: 13.5, bold: true, color: NAVY, fontFace: "Cambria", lineSpacing: 16,
+  });
+  slide.addText(
+    "Chosen because it handles venue_type / geo_cluster / traffic_tier as native categorical splits. geo_cluster alone has 20+ levels — one-hot encoding that would blow the feature space up and dilute each split's signal. categorical_features=\"from_dtype\" avoids that entirely, no preprocessing needed.",
+    { x: 0.6, y: 2.4, w: 5.9, h: 1.3, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
+  );
+  slide.addText("Target: realized_ad_revenue", {
+    x: 0.6, y: 3.85, w: 5.9, h: 0.4, fontSize: 13.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "The venue's actual weekly $ ad revenue — not a proxy, not a survey response.",
+    { x: 0.6, y: 4.35, w: 5.9, h: 0.4, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
+  );
+
+  // Right: the two-source feature list
+  slide.addText("Features — two sources", { x: 6.85, y: 1.8, w: 5.9, h: 0.35, fontSize: 13.5, bold: true, color: NAVY, fontFace: "Cambria" });
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 6.85, y: 2.22, w: 5.9, h: 1.75, rectRadius: 0.07, fill: { color: "F5F7FC" }, line: { type: "none" } });
+  slide.addText("This venue's own characteristics", { x: 7.1, y: 2.35, w: 5.4, h: 0.3, fontSize: 11, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText(
+    "venue_type · geo_cluster · traffic_tier\nbaseline_level · dwell_time_min\nscreen_count · audience_quality",
+    { x: 7.1, y: 2.7, w: 5.4, h: 1.15, fontSize: 10.5, color: TEXT_DARK, fontFace: "Courier New", lineSpacing: 17 }
+  );
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 6.85, y: 4.12, w: 5.9, h: 1.45, rectRadius: 0.07, fill: { color: "FDF1E3" }, line: { type: "none" } });
+  slide.addText("From the Q1/Q2 causal pipeline (RCT: Slide 7 · MMM: Slide 10)", { x: 7.1, y: 4.25, w: 5.4, h: 0.3, fontSize: 10.3, bold: true, color: "8A4B0A", fontFace: "Cambria" });
+  slide.addText(
+    "calibrated_lift_feature — the RCT-calibrated per-exposure lift from the MMM. This is where the advertising-incrementality pipeline plugs into the venue-economics side — the connection promised on Slide 14, not a separate silo.",
+    { x: 7.1, y: 4.58, w: 5.4, h: 0.95, fontSize: 9.7, color: "8A4B0A", fontFace: "Calibri", lineSpacing: 12.5 }
+  );
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 0.6, y: 5.75, w: 12.13, h: 1.05, rectRadius: 0.06, fill: { color: "F5F7FC" }, line: { type: "none" } });
+  slide.addText(
+    "Method, honestly: held-out metrics (next slide) come from a genuine 30% test split, stratified by venue_type — never train-set fit. Under-monetization flags come from 5-fold out-of-fold predictions — every venue's flag uses a model that never saw its own revenue. Prospect venues (no revenue history) are scored by that same trained model, not a separate heuristic.",
+    { x: 0.85, y: 5.87, w: 11.6, h: 0.85, fontSize: 10.5, italic: true, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
+  );
+
+  addFooter(slide, "Venue economics — model & inputs");
+}
+
+// ---------------------------------------------------------------------------
 // Slide 14 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
@@ -876,7 +931,7 @@ function addStepTag(slide, label, color) {
   slide.background = { color: WHITE };
   slide.addText("Predicting venue ad-revenue, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
   addStepTag(slide, "Step 5 of 6 · Answers Q3", QCOLOR.Q3);
-  slide.addText("Gradient-boosted trees on observable venue characteristics + the calibrated per-exposure lift as a feature.", {
+  slide.addText("Held-out evaluation, feature importance, and the venues these numbers actually flag (model & features: previous slide).", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
@@ -901,13 +956,17 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Importance (mean R² drop)", labels: feat.map((f) => f.feature.replace(/_/g, " ")), values: feat.map((f) => f.importance) },
   ], {
-    x: 0.6, y: 3.15, w: 5.9, h: 3.55, barDir: "bar", chartColors: ["55A868"], showLegend: false,
+    x: 0.6, y: 3.15, w: 5.9, h: 3.1, barDir: "bar", chartColors: ["55A868"], showLegend: false,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelFormatCode: "0.00",
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
     valAxisLabelFontSize: 8.5, valAxisLabelColor: TEXT_MUTED,
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
     title: "Feature importance (permutation, test set)", showTitle: true, titleFontSize: 11.5, titleColor: NAVY,
   });
+  slide.addText(
+    "Permutation, not gain-based — gain-based splits are biased toward high-cardinality categoricals like geo_cluster (20+ levels).",
+    { x: 0.6, y: 6.28, w: 5.9, h: 0.35, fontSize: 8.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
+  );
 
   // top under-monetized venues + top prospects (right)
   let ty = 3.15;
