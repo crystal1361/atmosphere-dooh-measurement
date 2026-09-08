@@ -134,6 +134,7 @@ src/
 data/                          # generated venues.csv, weekly_panel.csv, ground_truth.json,
                                 # venue_economics.csv, prospect_venues.csv, venue_economics_ground_truth.json,
                                 # venue_retention.csv, venue_retention_ground_truth.json
+                                # see data/README.md for which columns are observable vs. validation-only
 outputs/tables/                # every script's output tables (effect estimates, params)
 outputs/figures/               # (reserved for exported static figures)
 dashboard/
