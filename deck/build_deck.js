@@ -14,6 +14,10 @@ const AMBER = "E8871E";
 const TEXT_DARK = "1A1A2E";
 const TEXT_MUTED = "5B6178";
 const GOOD_GREEN = "2C7A57";
+// Q1-Q4 map to slide 4's four business questions; reused by slide 5's process-flow
+// steps and by the per-slide "Step X · Answers QY" tags on slides 6-14 so the same
+// color consistently means the same question throughout the deck.
+const QCOLOR = { Q1: NAVY, Q2: "B8500A", Q3: GOOD_GREEN, Q4: "8E3B60" };
 
 const VTYPE_LABEL = {
   restaurant: "Restaurants",
@@ -46,6 +50,20 @@ function addFooter(slide, pageLabel) {
   });
   slide.addText("Synthetic demo — validated against a known injected ground truth", {
     x: 8.3, y: 7.15, w: 4.5, h: 0.3, fontSize: 9, color: TEXT_MUTED, fontFace: "Calibri", align: "right",
+  });
+}
+
+// Small top-right pill tying a demo slide back to slide 5's numbered pipeline step
+// and slide 4's numbered business question -- e.g. "Step 1 of 6 · Answers Q1".
+// A neutral TEXT_MUTED color marks a slide that spans multiple steps/questions
+// (foundation or transition) rather than answering one directly.
+function addStepTag(slide, label, color) {
+  const x = 9.0, y = 0.16, w = 3.73, h = 0.27;
+  slide.addShape(pres.ShapeType.roundRect, {
+    x, y, w, h, rectRadius: 0.06, fill: { color: WHITE }, line: { color, width: 1.25 },
+  });
+  slide.addText(label, {
+    x, y, w, h, fontSize: 9.5, bold: true, color, align: "center", valign: "middle", fontFace: "Calibri",
   });
 }
 
@@ -218,7 +236,6 @@ function addFooter(slide, pageLabel) {
     { title: "Venue revenue model", sub: "GBT, honest OOF", desc: "Venue characteristics + the calibrated lift (steps 1–3) as a feature. Flags under-monetized venues; ranks expansion prospects.", q: "Q3" },
     { title: "Venue retention model", sub: "GBT classifier, honest OOF", desc: "Ops-visible signals (engagement, uptime, complaints, outreach) + realized revenue. Flags at-risk venues; combines with Q3 into one value×risk priority.", q: "Q4" },
   ];
-  const QCOLOR = { Q1: NAVY, Q2: "B8500A", Q3: GOOD_GREEN, Q4: "8E3B60" };
   // Each question gets one color family: dark box = that group's "deliverable" step,
   // light tint = that group's other step(s) -- so a shared hue, not just the badge,
   // signals which steps belong together (was a flat neutral gray for steps 2-3 before,
@@ -285,6 +302,7 @@ function addFooter(slide, pageLabel) {
   slide.addText("Synthetic data with a known, injected ground truth", {
     x: 0.6, y: 0.5, w: 12.2, h: 0.7, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria",
   });
+  addStepTag(slide, "Foundation for Steps 1–3 · Q1–Q2", TEXT_MUTED);
 
   slide.addText(
     `${DATA.n_venue_types} venue types × ${DATA.n_venues_per_type} venues each, 104 weeks (52 pre-period + 52 campaign)`,
@@ -323,6 +341,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("RCT geo-holdout — high confidence", { x: 0.6, y: 0.45, w: 10, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 1 of 6 · Answers Q1", QCOLOR.Q1);
   slide.addShape(pres.ShapeType.roundRect, {
     x: 10.7, y: 0.5, w: 2.1, h: 0.55, rectRadius: 0.08, fill: { color: GOOD_GREEN }, line: { type: "none" },
   });
@@ -374,6 +393,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("Synthetic control — moderate confidence", { x: 0.6, y: 0.45, w: 11, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 2 of 6 · Answers Q1", QCOLOR.Q1);
   slide.addText("Covers historical, non-randomized campaigns — the identifying assumption can't be directly tested the way randomization can, only checked indirectly.", {
     x: 0.6, y: 1.1, w: 11.8, h: 0.5, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
@@ -419,6 +439,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("MMM: an uncalibrated model would have underpriced results", { x: 0.6, y: 0.45, w: 12.3, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 3 of 6 · Answers Q2", QCOLOR.Q2);
   slide.addText("Adstock + saturation shape comes from the aggregate weekly series; scale is pinned by the RCT's high-confidence estimate.", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
@@ -467,6 +488,7 @@ function addFooter(slide, pageLabel) {
   slide.addText("Robustness check: does competing media break this MMM?", {
     x: 0.6, y: 0.45, w: 12.3, h: 0.65, fontSize: 24, bold: true, color: NAVY, fontFace: "Cambria",
   });
+  addStepTag(slide, "Step 3 robustness check · Q2", QCOLOR.Q2);
   slide.addText(
     "A synthetic “other advertisers were busy too” shock, correlated with Atmosphere's own exposure ramp-up — layered onto the validated data as a labeled overlay, not a change to it.",
     { x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri" }
@@ -515,6 +537,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("Budget allocator: exact DP, not a greedy walk", { x: 0.6, y: 0.45, w: 12, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 4 of 6 · Answers Q2", QCOLOR.Q2);
 
   slide.addShape(pres.ShapeType.roundRect, { x: 0.6, y: 1.25, w: 12.1, h: 1.0, rectRadius: 0.08, fill: { color: "FDF1E3" }, line: { type: "none" } });
   slide.addText(
@@ -558,6 +581,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: NAVY_DARK };
   slide.addText("The other side of the business", { x: 0.6, y: 0.5, w: 12, h: 0.7, fontSize: 28, bold: true, color: WHITE, fontFace: "Cambria" });
+  addStepTag(slide, "Transition · Q1–Q2 → Q3–Q4", TEXT_MUTED);
   slide.addText("One system answers the advertising side. The same system answers the venue-network side too.", {
     x: 0.6, y: 1.2, w: 12, h: 0.45, fontSize: 13.5, italic: true, color: ICE, fontFace: "Calibri",
   });
@@ -609,6 +633,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("Predicting venue ad-revenue, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 5 of 6 · Answers Q3", QCOLOR.Q3);
   slide.addText("Gradient-boosted trees on observable venue characteristics + the calibrated per-exposure lift as a feature.", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
@@ -675,6 +700,7 @@ function addFooter(slide, pageLabel) {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
   slide.addText("Predicting venue churn risk, honestly", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 6 of 6 · Answers Q4", QCOLOR.Q4);
   slide.addText("Gradient-boosted classifier on ops-visible signals (engagement, uptime, complaints, competitor outreach) — the other half of \"what makes a venue valuable and what puts it at risk.\"", {
     x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
