@@ -313,9 +313,9 @@ function addStepTag(slide, label, color) {
   // ad activity, and for whom, is the thing a reader most often has to ask about twice.
   const weekRows = [
     { seg: "0–51\n(52 wks)\nPre-period", rct: "No ads for either arm — establishes each venue's own baseline.", obs: "No ads yet for anyone — identical baseline period." },
-    { seg: "52–59\n(8 wks)", rct: "Still silent — the designed test hasn't launched yet. Unused by the current effect estimate.", obs: "24 of 264 self-activate here — each advertiser's own timing, no coordination." },
-    { seg: "60–69\n(10 wks)\nRCT window", rct: "Treated: fixed 6 plays/wk. Holdout: still 0. The only window the RCT estimate uses.", obs: "37 more self-activate here — overlap with the RCT window is coincidence, not design." },
-    { seg: "70–103\n(34 wks)\nPost-campaign", rct: "Ads stop — a real tail holds for ~10 weeks, then fades to zero (see persistence check, next).", obs: "69 more (the largest group) start only now — most real campaigns land late, spread thin." },
+    { seg: "52–59\n(8 wks)", rct: "Still silent — the designed test hasn't launched yet. Unused by the current effect estimate.", obs: "24 of 264 go live here — each on its own timing, no coordination." },
+    { seg: "60–69\n(10 wks)\nRCT window", rct: "Treated: fixed 6 plays/wk. Holdout: still 0. The only window the RCT estimate uses.", obs: "37 more go live here — overlap with the RCT window is coincidence, not design." },
+    { seg: "70–103\n(34 wks)\nPost-campaign", rct: "Ads stop — a real tail holds for ~10 weeks, then fades to zero (see persistence check, next).", obs: "69 more (the largest group) go live only now — most real campaigns land late, spread thin." },
   ];
 
   const headerOpts = { bold: true, color: WHITE, fill: { color: NAVY }, fontSize: 11.5, valign: "middle", fontFace: "Calibri" };
@@ -343,8 +343,8 @@ function addStepTag(slide, label, color) {
   });
 
   slide.addText(
-    "RCT pool: assignment is verified, not assumed — anchors high confidence. Observational pool: 134 of 264 venues never run a campaign at all, and the rest 130 venues self-activate on their own schedule — exactly why synthetic control (next) reconstructs the counterfactual instead of comparing before/after directly.",
-    { x: 0.6, y: 6.15, w: 12.13, h: 0.75, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
+    "RCT pool: assignment is verified, not assumed — anchors high confidence. Observational pool: 134 of 264 venues never run a campaign at all, and the rest 130 go live at their own, uncoordinated point in time — whether a venue is using its own free self-promotion slot or Atmosphere sold the remaining inventory there to an outside advertiser, the panel only records that the screen started playing ads, not who bought the airtime — exactly why synthetic control (next) reconstructs the counterfactual instead of comparing before/after directly.",
+    { x: 0.6, y: 6.1, w: 12.13, h: 0.85, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
   );
 
   addFooter(slide, "Data & methodology");
