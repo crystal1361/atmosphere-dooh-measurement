@@ -617,8 +617,8 @@ function addStepTag(slide, label, color) {
     { x: 0.6, y: 4.63, w: 7.6, h: 1.6, fontSize: 9, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 10.8 }
   );
   slide.addText(
-    "Simplified for the demo: a real deployment would add more controls (competitor spend, price/promo, macro trend), validate the shape out-of-time rather than on in-sample SSE alone, and often blend the experiment in as a Bayesian prior rather than a hard rescale.",
-    { x: 0.6, y: 6.28, w: 7.6, h: 0.6, fontSize: 8.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
+    "Why the naive estimate undershoots: the aggregate series it's fit on is sparse — restaurants never average above ~2.6 plays/wk — versus the RCT's sustained 6 plays/wk. The fitted curve is extrapolated into that untested territory, where a Hill curve's convex early segment (Slide 12) tends to undersell the upside; pooling RCT and non-randomly-selected venues in the same aggregate fit adds further bias. The RCT measures that exposure directly, not by extrapolation.",
+    { x: 0.6, y: 6.28, w: 7.6, h: 0.72, fontSize: 8.3, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10 }
   );
 
   let ty = 1.75;
@@ -654,6 +654,72 @@ function addStepTag(slide, label, color) {
   );
 
   addFooter(slide, "Media-mix model");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 10b — Why calibrate only one of eight parameters?
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("Why calibrate only one of eight parameters?", { x: 0.6, y: 0.45, w: 12.3, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 3 continued · Answers Q2", QCOLOR.Q2);
+  slide.addText(
+    "The MMM regression has 8 free parameters. One RCT arm gives exactly one clean number — enough to calibrate exactly one of them.",
+    { x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri" }
+  );
+
+  // Left: the full regression, then the method for why only beta moves
+  slide.addText("The regression, in full", {
+    x: 0.6, y: 1.65, w: 7.6, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "adstock_t  = freq_t + decay·adstock_(t−1)\n"
+    + "sat(x)     = x^shape ÷ (x^shape + half^shape)\n"
+    + "traffic_t  = β · sat(adstock_t)\n"
+    + "           + trend_coef · week_t\n"
+    + "           + season_sin_coef · sin(2π·week_t /52)\n"
+    + "           + season_cos_coef · cos(2π·week_t /52)\n"
+    + "           + intercept",
+    { x: 0.6, y: 1.95, w: 7.6, h: 1.35, fontSize: 9.3, color: TEXT_DARK, fontFace: "Courier New", lineSpacing: 13 }
+  );
+  slide.addText("Method: why only β is RCT-calibrated", {
+    x: 0.6, y: 3.42, w: 7.6, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "① One RCT arm supplies exactly one clean number — a single measured average lift at one exposure design. That's enough information to pin down exactly one free parameter without the fit becoming underdetermined.\n"
+    + "② trend_coef, season_sin_coef, season_cos_coef, and the intercept are nuisance controls, not causal targets. Randomization balances them between the RCT's treatment and control arms — it doesn't estimate what their true values are, so there's nothing for the RCT to calibrate there.\n"
+    + "③ decay, half, and shape describe the curve's dynamics — how fast memory fades, where it saturates, how steep the climb is. These are identified from the much richer week-to-week variation across the whole aggregate series, not from a single experimental anchor.\n"
+    + "④ β (the media/scale coefficient) is exactly the piece most exposed to endogeneity: this aggregate series pools RCT venues with non-randomly-selected observational ones. Its overall level is the one thing a single clean causal estimate both can, and should, correct.",
+    { x: 0.6, y: 3.75, w: 7.6, h: 3.15, fontSize: 9.8, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+  );
+
+  // Right: the 8 parameters split into the two groups, one calibrated
+  slide.addText("8 free parameters, one RCT anchor", { x: 8.5, y: 1.65, w: 4.3, h: 0.3, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria" });
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 8.5, y: 2.05, w: 4.3, h: 1.95, rectRadius: 0.07, fill: { color: "F5F7FC" }, line: { type: "none" } });
+  slide.addText("5 linear coefficients (OLS)", { x: 8.75, y: 2.18, w: 3.8, h: 0.3, fontSize: 11, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText(
+    [
+      { text: "β_media  ← RCT-calibrated\n", options: { color: "B8500A", bold: true } },
+      { text: "trend_coef\nseason_sin_coef\nseason_cos_coef\nintercept", options: { color: TEXT_DARK } },
+    ],
+    { x: 8.75, y: 2.55, w: 3.8, h: 1.35, fontSize: 10.3, fontFace: "Courier New", lineSpacing: 16.5 }
+  );
+
+  slide.addShape(pres.ShapeType.roundRect, { x: 8.5, y: 4.15, w: 4.3, h: 1.35, rectRadius: 0.07, fill: { color: "FDF1E3" }, line: { type: "none" } });
+  slide.addText("3 shape hyperparameters (grid search)", { x: 8.75, y: 4.28, w: 3.8, h: 0.3, fontSize: 10.3, bold: true, color: "8A4B0A", fontFace: "Cambria" });
+  slide.addText(
+    "decay · half · shape\nFit from the aggregate time series (168-combo grid search), not the RCT anchor.",
+    { x: 8.75, y: 4.62, w: 3.8, h: 0.82, fontSize: 9.7, color: "8A4B0A", fontFace: "Calibri", lineSpacing: 12.5 }
+  );
+
+  slide.addText(
+    "One RCT arm → one calibrated parameter. Calibrating the curve's shape too would need RCT arms at multiple exposure levels — a bigger, costlier experiment design than the single geo-holdout test used here (Slide 6).",
+    { x: 8.5, y: 5.75, w: 4.3, h: 1.05, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
+  );
+
+  addFooter(slide, "Media-mix model — why one parameter");
 }
 
 // ---------------------------------------------------------------------------
