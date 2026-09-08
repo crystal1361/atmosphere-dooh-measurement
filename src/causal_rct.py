@@ -169,8 +169,15 @@ def estimate_post_campaign_decay(venues, panel, gt):
         treated = joined[joined["rct_arm"] == "treated"]["delta"].dropna()
         holdout = joined[joined["rct_arm"] == "holdout"]["delta"].dropna()
         effect = treated.mean() - holdout.mean()
-        se = np.sqrt(treated.var(ddof=1) / len(treated) + holdout.var(ddof=1) / len(holdout))
+        v1, v2 = treated.var(ddof=1), holdout.var(ddof=1)
+        n1, n2 = len(treated), len(holdout)
+        se = np.sqrt(v1 / n1 + v2 / n2)
         t_stat, p_val = stats.ttest_ind(treated, holdout, equal_var=False)
+        # Same Welch-Satterthwaite CI as estimate_rct_effects() -- matches the
+        # unequal-variance t-distribution ttest_ind already uses for p_val.
+        df = (v1 / n1 + v2 / n2) ** 2 / ((v1 / n1) ** 2 / (n1 - 1) + (v2 / n2) ** 2 / (n2 - 1))
+        t_crit = stats.t.ppf(0.975, df)
+        ci_lo, ci_hi = effect - t_crit * se, effect + t_crit * se
         rows.append(
             dict(
                 window=label,
@@ -178,9 +185,11 @@ def estimate_post_campaign_decay(venues, panel, gt):
                 week_end=hi - 1,
                 estimated_lift=effect,
                 se=se,
+                ci_low=ci_lo,
+                ci_high=ci_hi,
                 p_value=p_val,
-                n_treated=len(treated),
-                n_holdout=len(holdout),
+                n_treated=n1,
+                n_holdout=n2,
             )
         )
     return pd.DataFrame(rows)
