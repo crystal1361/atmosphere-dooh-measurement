@@ -971,20 +971,24 @@ function addStepTag(slide, label, color) {
   // top under-monetized venues + top prospects (right)
   let ty = 3.15;
   slide.addText(`Top under-monetized venues (of ${p2.n_flagged} flagged)`, { x: 6.85, y: ty, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
-  ty += 0.36;
-  p2.top_flags.slice(0, 4).forEach((f) => {
-    slide.addText(`Venue #${f.venue_id} (${VTYPE_LABEL[f.venue_type]})`, { x: 6.85, y: ty, w: 4.0, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
-    slide.addText(`${f.gap_pct.toFixed(0)}%`, { x: 10.9, y: ty, w: 1.85, h: 0.3, fontSize: 10, bold: true, color: "B8500A", fontFace: "Calibri", align: "right" });
-    ty += 0.32;
+  ty += 0.32;
+  slide.addText("gap_pct = (actual − OOF predicted) ÷ OOF predicted × 100", {
+    x: 6.85, y: ty, w: 5.9, h: 0.22, fontSize: 8.7, italic: true, color: TEXT_MUTED, fontFace: "Courier New",
   });
-  ty += 0.2;
+  ty += 0.26;
+  p2.top_flags.slice(0, 4).forEach((f) => {
+    slide.addText(`Venue #${f.venue_id} (${VTYPE_LABEL[f.venue_type]})`, { x: 6.85, y: ty, w: 4.0, h: 0.28, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(`${f.gap_pct.toFixed(0)}%`, { x: 10.9, y: ty, w: 1.85, h: 0.28, fontSize: 10, bold: true, color: "B8500A", fontFace: "Calibri", align: "right" });
+    ty += 0.28;
+  });
+  ty += 0.15;
   slide.addText("Top prospect venues (expansion priority)", { x: 6.85, y: ty, w: 5.9, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
-  ty += 0.36;
+  ty += 0.32;
   p2.top_prospects.slice(0, 4).forEach((pr) => {
     const tag = pr.in_expansion_market ? "new market" : "existing market";
-    slide.addText(`${pr.prospect_id} — ${VTYPE_LABEL[pr.venue_type]} (${tag})`, { x: 6.85, y: ty, w: 4.4, h: 0.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
-    slide.addText(`$${pr.predicted_revenue.toFixed(0)}`, { x: 11.15, y: ty, w: 1.6, h: 0.3, fontSize: 10, bold: true, color: GOOD_GREEN, fontFace: "Calibri", align: "right" });
-    ty += 0.32;
+    slide.addText(`${pr.prospect_id} — ${VTYPE_LABEL[pr.venue_type]} (${tag})`, { x: 6.85, y: ty, w: 4.4, h: 0.28, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(`$${pr.predicted_revenue.toFixed(0)}`, { x: 11.15, y: ty, w: 1.6, h: 0.28, fontSize: 10, bold: true, color: GOOD_GREEN, fontFace: "Calibri", align: "right" });
+    ty += 0.28;
   });
 
   slide.addText(
