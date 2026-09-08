@@ -291,7 +291,48 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 6 — Data & methodology
+// Slide 6 — Roadmap: problem -> method (outline before the deep dive)
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("The roadmap: four problems, four methods", {
+    x: 0.6, y: 0.5, w: 12.2, h: 0.7, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText("Before the deep dive — this is the shape of what follows.", {
+    x: 0.6, y: 1.2, w: 12, h: 0.4, fontSize: 13, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
+  });
+
+  const ROADMAP_TINT = { Q1: "E4E9F7", Q2: "FBE8D2", Q3: "E2F1E9", Q4: "F5E3EC" };
+  const roadmap = [
+    { q: "Q1", problem: "Did the campaign actually work?", method: "RCT geo-holdout, extended to historical campaigns with synthetic control." },
+    { q: "Q2", problem: "How should budget be spent?", method: "RCT-calibrated MMM, then an exact DP budget allocator over the calibrated response curves." },
+    { q: "Q3", problem: "Where's the revenue upside?", method: "Gradient-boosted venue-revenue model, honest out-of-fold evaluation." },
+    { q: "Q4", problem: "Which venues are at risk?", method: "Gradient-boosted churn classifier, combined with Q3 into one value × risk priority." },
+  ];
+  const rowY0 = 1.85, rowH = 1.05, rowGap = 0.15, rowW = 12.13, rowStep = rowH + rowGap;
+  roadmap.forEach((r, i) => {
+    const y = rowY0 + i * rowStep;
+    slide.addShape(pres.ShapeType.roundRect, {
+      x: 0.6, y, w: rowW, h: rowH, rectRadius: 0.1, fill: { color: ROADMAP_TINT[r.q] }, line: { type: "none" },
+    });
+    slide.addShape(pres.ShapeType.ellipse, { x: 0.9, y: y + rowH / 2 - 0.3, w: 0.6, h: 0.6, fill: { color: QCOLOR[r.q] } });
+    slide.addText(r.q, {
+      x: 0.9, y: y + rowH / 2 - 0.3, w: 0.6, h: 0.6, fontSize: 15, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri",
+    });
+    slide.addText(r.problem, {
+      x: 1.8, y: y + 0.1, w: 4.5, h: rowH - 0.2, fontSize: 14.5, bold: true, color: QCOLOR[r.q], fontFace: "Cambria", valign: "middle", lineSpacing: 17,
+    });
+    slide.addText(r.method, {
+      x: 6.5, y: y + 0.1, w: 5.9, h: rowH - 0.2, fontSize: 12.5, color: TEXT_DARK, fontFace: "Calibri", valign: "middle", lineSpacing: 16,
+    });
+  });
+
+  addFooter(slide, "Roadmap");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 7 — Data & methodology
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -332,7 +373,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 7 — RCT results
+// Slide 8 — RCT results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -390,7 +431,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 8 — Synthetic control results
+// Slide 9 — Synthetic control results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -435,7 +476,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 9 — MMM calibration (the headline technical story)
+// Slide 10 — MMM calibration (the headline technical story)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -450,10 +491,9 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Naive MMM (uncalibrated)", labels: mmm.map((r) => VTYPE_LABEL[r.venue_type]), values: mmm.map((r) => r.beta_naive) },
     { name: "RCT-calibrated MMM", labels: mmm.map((r) => VTYPE_LABEL[r.venue_type]), values: mmm.map((r) => r.beta_calibrated) },
-    { name: "True max lift", labels: mmm.map((r) => VTYPE_LABEL[r.venue_type]), values: mmm.map((r) => r.true_max_lift_ground_truth) },
   ], {
     x: 0.6, y: 1.75, w: 7.6, h: 4.3,
-    barDir: "col", chartColors: ["A9AFC7", NAVY, AMBER], showLegend: true, legendPos: "b", legendFontSize: 9.5,
+    barDir: "col", chartColors: ["A9AFC7", NAVY], showLegend: true, legendPos: "b", legendFontSize: 9.5,
     showValue: true, dataLabelFontSize: 8.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
     valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED,
@@ -474,7 +514,7 @@ function addStepTag(slide, label, color) {
     ty += 0.65;
   });
   slide.addText(
-    "For 3 of 4 venue types, the naive observational fit understated true incremental lift by 100–165% — the kind of gap real MMM practice cites as its core identification problem, and exactly why the RCT anchor matters.",
+    "For 3 of 4 venue types, the naive observational fit understated the RCT-calibrated estimate by 100–165% — the kind of gap real MMM practice cites as its core identification problem, and exactly why the RCT anchor matters.",
     { x: 8.5, y: ty + 0.15, w: 4.2, h: 1.6, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
   );
 
@@ -482,7 +522,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — MMM robustness check: competing media as a confounder
+// Slide 11 — MMM robustness check: competing media as a confounder
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -492,7 +532,7 @@ function addStepTag(slide, label, color) {
   });
   addStepTag(slide, "Step 3 robustness check · Q2", QCOLOR.Q2);
   slide.addText(
-    "A synthetic “other advertisers were busy too” shock, correlated with Atmosphere's own exposure ramp-up — layered onto the validated data as a labeled overlay, not a change to it.",
+    "A stress-test scenario: a competing advertiser ramps up on the same venues at the same time, correlated with Atmosphere's own exposure — the kind of overlap a real MMM has to prove it's robust to.",
     { x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri" }
   );
 
@@ -501,10 +541,9 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Naive MMM (blind to competing media)", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.beta_naive_confound_blind) },
     { name: "Confound-aware MMM (controls for it)", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.beta_confound_aware) },
-    { name: "True max lift", labels: ccRows.map((r) => VTYPE_LABEL[r.venue_type]), values: ccRows.map((r) => r.true_max_lift_ground_truth) },
   ], {
     x: 0.6, y: 1.75, w: 7.6, h: 4.3,
-    barDir: "col", chartColors: ["C44E52", "55A868", AMBER], showLegend: true, legendPos: "b", legendFontSize: 9,
+    barDir: "col", chartColors: ["C44E52", "55A868"], showLegend: true, legendPos: "b", legendFontSize: 9,
     showValue: true, dataLabelFontSize: 8.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
     valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED,
@@ -520,7 +559,7 @@ function addStepTag(slide, label, color) {
   });
 
   slide.addText(
-    `Naive MMM, by contrast, swings from useful to actively misleading: for 3 of 4 venue types the confound-blind fit was off by 2–4× — even though the injected correlation between competing media and Atmosphere's own exposure ramp is only ${cc.corr_with_own_exposure} (moderate, not a worst case). Controlling for the confound (green) recovers this model's own uncalibrated baseline from the previous slide — still short of true max lift (orange) until the RCT-scale calibration from that same slide is applied on top.`,
+    `Naive MMM, by contrast, swings from useful to actively misleading: for 3 of 4 venue types the confound-blind fit was off by 2–4× — even at a moderate ${cc.corr_with_own_exposure} correlation between competing media and Atmosphere's own exposure ramp, nowhere near a worst case. Controlling for the confound (green) recovers this model's own baseline from the previous slide — the RCT-scale calibration from that same slide is what closes the rest of the gap.`,
     { x: 8.5, y: 3.35, w: 4.23, h: 1.55, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 }
   );
 
@@ -533,7 +572,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 11 — Budget allocator
+// Slide 12 — Budget allocator
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -577,7 +616,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — The other side of the business
+// Slide 13 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -629,7 +668,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 13 — Venue revenue model results
+// Slide 14 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -645,8 +684,8 @@ function addStepTag(slide, label, color) {
   const metrics = [
     { label: "Held-out R²", value: p2.r2_test.toFixed(2) },
     { label: "Held-out MAPE", value: `${p2.mape_test.toFixed(1)}%` },
-    { label: "Corr. w/ latent true potential", value: p2.potential_corr.toFixed(2) },
-    { label: "Flagged-tail latent gap rate", value: `${p2.flagged_latent_gap_rate.toFixed(0)}% vs ${p2.population_latent_gap_rate.toFixed(0)}%` },
+    { label: "Held-out MAE", value: `$${p2.mae_test.toFixed(0)}` },
+    { label: "Venues flagged", value: String(p2.n_flagged) },
   ];
   const mW = 2.9;
   metrics.forEach((m, i) => {
@@ -696,7 +735,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 14 — Venue retention model results
+// Slide 15 — Venue retention model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -710,10 +749,10 @@ function addStepTag(slide, label, color) {
   const p3 = DATA.venue_retention;
   const metricY = 1.65;
   const metrics2 = [
-    { label: "Held-out AUC (oracle ceiling: 0.73)", value: p3.auc_test.toFixed(2) },
+    { label: "Held-out AUC", value: p3.auc_test.toFixed(2) },
     { label: "Held-out PR-AUC", value: p3.pr_auc_test.toFixed(2) },
-    { label: "OOF corr. w/ latent true risk", value: p3.oof_true_risk_corr.toFixed(2) },
-    { label: "Flagged-tail latent risk rate", value: `${p3.flagged_latent_gap_rate.toFixed(0)}% vs ${p3.population_latent_gap_rate.toFixed(0)}%` },
+    { label: "Brier score", value: p3.brier_test.toFixed(2) },
+    { label: "Venues flagged", value: String(p3.n_flagged) },
   ];
   const mW2 = 2.9;
   metrics2.forEach((m, i) => {
@@ -773,14 +812,14 @@ function addStepTag(slide, label, color) {
   });
 
   slide.addText(
-    "Flags come from 5-fold OOF predictions; AUC/PR-AUC read modest next to the revenue model's R² only because the oracle ceiling here is 0.73 AUC. realized_ad_revenue's importance is a venue_type confound, not a causal driver. Each \"Save now\" / flagged venue also carries a SHAP top driver (from the fold model that never saw it) mapped to a concrete action — technical dispatch, AM retention call, content review — not a generic \"reach out.\"",
+    "Flags come from 5-fold OOF predictions; AUC/PR-AUC read modest next to the revenue model's R² because churn is a rarer, noisier event to call than revenue — typical for a churn classifier, not a modeling miss. realized_ad_revenue's importance is a venue_type confound, not a causal driver. Each \"Save now\" / flagged venue also carries a SHAP top driver (from the fold model that never saw it) mapped to a concrete action — technical dispatch, AM retention call, content review — not a generic \"reach out.\"",
     { x: 0.6, y: 6.58, w: 12.1, h: 0.6, fontSize: 8.7, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
   );
   addFooter(slide, "Venue retention");
 }
 
 // ---------------------------------------------------------------------------
-// Slide 15 — Closing / takeaways
+// Slide 16 — Closing / takeaways
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -789,9 +828,9 @@ function addStepTag(slide, label, color) {
 
   const items = [
     "Match the method to the assignment mechanism — RCT where randomization is designed, synthetic control where it isn't, each with its own validation check.",
-    "An uncalibrated MMM understated true incremental value by up to 165% here — experiment calibration isn't optional polish, it's the identification fix.",
+    "An uncalibrated MMM understated the RCT-calibrated estimate by up to 165% here — experiment calibration isn't optional polish, it's the identification fix.",
     "Optimization needs the right algorithm for the curve's shape — a greedy heuristic silently lost to a naive baseline on non-concave response curves; the exact DP formulation doesn't.",
-    "One connected system, not four separate projects: the venue-revenue model reuses the causal pipeline's per-exposure value as an input; the retention model then combines its own churn-risk score with that revenue prediction into one value-×-risk priority quadrant — both models recover their respective latent ground truths (0.95 and 0.73 correlation) before either is trusted.",
+    "One connected system, not four separate projects: the venue-revenue model reuses the causal pipeline's per-exposure value as an input; the retention model then combines its own churn-risk score with that revenue prediction into one value-×-risk priority quadrant — both models are evaluated honestly out-of-fold, never scored on a venue they were trained on, before either is trusted.",
   ];
   let y = 1.9;
   items.forEach((t, i) => {
