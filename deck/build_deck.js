@@ -855,7 +855,11 @@ function addStepTag(slide, label, color) {
   const b100 = DATA.budgets.find((b) => b.budget === 100000);
   const alloc = byOrder(b100.allocation);
   slide.addChart(pres.ChartType.bar, [
-    { name: "Allocated weekly budget ($)", labels: alloc.map((r) => VTYPE_LABEL[r.venue_type]), values: alloc.map((r) => r.allocated_weekly_budget) },
+    {
+      name: "Allocated weekly budget ($)",
+      labels: alloc.map((r) => `${VTYPE_LABEL[r.venue_type]}\n(freq ${r.frequency_per_venue.toFixed(1)}/wk)`),
+      values: alloc.map((r) => r.allocated_weekly_budget),
+    },
   ], {
     x: 0.6, y: 4.6, w: 7.3, h: 2.35,
     barDir: "col", chartColors: [NAVY], showLegend: false,
