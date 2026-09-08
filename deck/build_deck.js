@@ -634,27 +634,22 @@ function addStepTag(slide, label, color) {
     ty += 0.44;
   });
   ty += 0.14;
-  slide.addText("Recovery vs. true effect (synthetic ground truth)", {
+  slide.addText("Worked example: restaurant's β, step by step", {
     x: 8.5, y: ty, w: 4.2, h: 0.28, fontSize: 10.5, bold: true, color: NAVY, fontFace: "Cambria",
   });
   ty += 0.32;
-  slide.addText("Venue type    Naive err   Calib err", {
-    x: 8.5, y: ty, w: 4.2, h: 0.24, fontSize: 8.5, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
-  });
-  ty += 0.26;
-  mmm.forEach((r) => {
-    const naiveErr = r.beta_naive - r.true_max_lift_ground_truth;
-    const calErr = r.beta_calibrated - r.true_max_lift_ground_truth;
-    const fmt = (v) => (v >= 0 ? "+" : "") + v.toFixed(1);
-    slide.addText(
-      `${VTYPE_LABEL[r.venue_type].padEnd(13)} ${fmt(naiveErr).padEnd(11)} ${fmt(calErr)}`,
-      { x: 8.5, y: ty, w: 4.2, h: 0.24, fontSize: 8.5, color: TEXT_DARK, fontFace: "Courier New" }
-    );
-    ty += 0.26;
-  });
-  ty += 0.12;
   slide.addText(
-    "Every calibrated error is far smaller than its naive error (restaurant: −10.0 → +0.7) — only checkable here because this is synthetic data with a known answer key. In a real deployment there's no such key; that's exactly why the RCT anchor is trusted rather than verified.",
+    "RCT design:      6 plays/wk × 10 wks\n"
+    + "Adstock (decay .7): 6.0→10.2→13.1→…→19.4\n"
+    + "Saturation (half 6, shape 3): .50→.83→.91→…→.97, avg≈0.90\n"
+    + "Naive predicts:  7.97 × 0.90 ≈ 7.2\n"
+    + "RCT measured:   16.79 (real, from Slide 7)\n"
+    + "Calibrated β:   16.79 ÷ 0.90 ≈ 18.7",
+    { x: 8.5, y: ty, w: 4.2, h: 1.3, fontSize: 8.7, color: TEXT_DARK, fontFace: "Courier New", lineSpacing: 13 }
+  );
+  ty += 1.42;
+  slide.addText(
+    "Only β is rescaled — decay/half/shape stay exactly as fit in step ①. calibration_adjustment_pct is just (β_calibrated − β_naive) ÷ β_naive: (18.69 − 7.97) ÷ 7.97 ≈ +134%, the number shown for restaurants above.",
     { x: 8.5, y: ty, w: 4.2, h: 1.0, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
   );
 
@@ -712,18 +707,83 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — Budget allocator
+// Slide 12a — Why a greedy allocator can lose (worked failure mechanism)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Budget allocator: exact DP, not a greedy walk", { x: 0.6, y: 0.45, w: 12, h: 0.65, fontSize: 27, bold: true, color: NAVY, fontFace: "Cambria" });
-  addStepTag(slide, "Step 4 of 6 · Answers Q2", QCOLOR.Q2);
-
-  slide.addShape(pres.ShapeType.roundRect, { x: 0.6, y: 1.25, w: 12.1, h: 1.0, rectRadius: 0.08, fill: { color: "FDF1E3" }, line: { type: "none" } });
+  slide.addText("Why a greedy allocator can lose to equal-split", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 26, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 4 motivation · Answers Q2", QCOLOR.Q2);
   slide.addText(
-    "A Hill/S-shaped response curve is CONVEX before its inflection point — a greedy “spend the next dollar on whichever venue type currently looks best” heuristic isn't guaranteed optimal there. An earlier greedy version of this allocator actually underperformed a naive equal-split baseline; the DP formulation below has no concavity requirement and is guaranteed to find the grid-optimal allocation.",
-    { x: 0.85, y: 1.35, w: 11.6, h: 0.85, fontSize: 12, italic: true, color: "8A4B0A", fontFace: "Calibri", lineSpacing: 15 }
+    "A Hill/S-curve (shape > 1, as fit here) is convex before its inflection point — the next dollar's marginal return isn't monotonically falling, so \"chase today's best marginal $\" can get stuck.",
+    { x: 0.6, y: 1.1, w: 12, h: 0.45, fontSize: 12, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
+  );
+
+  slide.addChart(pres.ChartType.line, [
+    { name: "Restaurant: incremental lift per $1,000 spent", labels: [".25", ".5", ".75", "1.0", "1.5", "2.0"], values: [5.0, 34.2, 86.9, 147.5, 205.8, 198.0] },
+  ], {
+    x: 0.6, y: 1.75, w: 7.2, h: 3.35,
+    chartColors: [NAVY], showLegend: false, lineSize: 2.5, lineDataSymbol: "circle", lineDataSymbolSize: 6,
+    showValue: true, dataLabelFontSize: 9, dataLabelPosition: "t", dataLabelColor: TEXT_DARK, dataLabelFormatCode: "0.0",
+    catAxisTitle: "Frequency (plays/venue/wk)", showCatAxisTitle: true, catAxisTitleFontSize: 9.5,
+    catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
+    valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED,
+    valAxisTitle: "Incremental lift per $1,000", showValAxisTitle: true, valAxisTitleFontSize: 10,
+    catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
+    title: "The next dollar's return rises, THEN falls — not monotonic", showTitle: true, titleFontSize: 11, titleColor: NAVY,
+  });
+  slide.addText(
+    "This real curve (restaurant, from this deck's own calibrated MMM) is convex up to ~freq 1.0–1.5, concave after. At very low frequency every venue type's next dollar buys almost nothing — still in the flat, convex trough — so a rule comparing \"which type's next dollar looks best right now\" can't see that committing a lump sum to ONE type would pay off later. It only sees today's small, similar-looking numbers.",
+    { x: 0.6, y: 5.2, w: 7.2, h: 1.55, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+  );
+
+  slide.addText("At freq ≈ .25, every type looks similarly unpromising", { x: 8.1, y: 1.75, w: 4.6, h: 0.4, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria", lineSpacing: 14 });
+  slide.addText(
+    "Venue type      Lift per $1,000\nBar                    1.4\nRestaurant             5.0\nGym                    6.1\nWaiting room           8.4",
+    { x: 8.1, y: 2.25, w: 4.6, h: 1.05, fontSize: 9.5, color: TEXT_DARK, fontFace: "Courier New", lineSpacing: 15 }
+  );
+  slide.addText(
+    "...but each type's own PEAK (always somewhere around freq 1–2) is 15–30× higher:",
+    { x: 8.1, y: 3.4, w: 4.6, h: 0.5, fontSize: 10, italic: true, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+  );
+  slide.addText(
+    "Bar ~124      Restaurant ~206\nGym ~132      Waiting room ~247",
+    { x: 8.1, y: 3.95, w: 4.6, h: 0.6, fontSize: 9.5, color: TEXT_DARK, fontFace: "Courier New", lineSpacing: 15 }
+  );
+  slide.addText(
+    "A greedy rule that only ever compares \"today's next dollar\" has no way to see that peak from here — it can only react to which of these near-tied numbers is currently largest, one tiny step at a time. This is the mechanism that let an earlier greedy version of this allocator underperform naive equal-split at larger budgets — the retired code itself isn't preserved, but this is the exact response-curve shape it was walking.",
+    { x: 8.1, y: 4.65, w: 4.6, h: 2.1, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12.5 }
+  );
+
+  addFooter(slide, "Productization — budget allocator, why not greedy");
+}
+
+// ---------------------------------------------------------------------------
+// Slide 12 — Budget allocator: how the exact DP works
+// ---------------------------------------------------------------------------
+{
+  const slide = pres.addSlide();
+  slide.background = { color: WHITE };
+  slide.addText("Budget allocator: how the exact DP actually works", { x: 0.6, y: 0.45, w: 12.2, h: 0.65, fontSize: 25, bold: true, color: NAVY, fontFace: "Cambria" });
+  addStepTag(slide, "Step 4 of 6 · Answers Q2", QCOLOR.Q2);
+  slide.addText(
+    "No concavity requirement — every discretized spend level is actually evaluated, so by construction it can never do worse than equal-split.",
+    { x: 0.6, y: 1.1, w: 12, h: 0.4, fontSize: 12.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri" }
+  );
+
+  slide.addText("Method: exact DP in four steps (multiple-choice knapsack)", {
+    x: 0.6, y: 1.55, w: 7.3, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "① Discretize: for each venue_type, sweep frequency 0→14/venue in 0.25 steps (57 points). At each point, read network lift = per-venue lift (from the calibrated MMM response curve) × venue count, and $ spend = freq × cost-per-frequency-unit × venue count.\n"
+    + "② Snap every candidate's spend onto a shared $250 grid, so all venue types' options line up on one budget axis — keeping only the highest-lift option at each grid point per type. This is that type's \"menu.\"\n"
+    + "③ Process venue types one at a time: for every $ grid point b, try each of that type's menu options with spend ≤ b, add it to whatever the types-already-processed achieved at (b − spend), and keep whichever combination gives the highest total lift — every option is actually tried, not estimated from a local slope.\n"
+    + "④ Backtrack from the full-budget column to read off which frequency was actually chosen for each venue type.",
+    { x: 0.6, y: 1.85, w: 7.3, h: 2.05, fontSize: 9.3, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 11.5 }
+  );
+  slide.addText(
+    "Grid granularity ($250 budget steps, 0.25 frequency steps) trades a little precision for tractability — the same principle real deployments use, just at production-scale resolution.",
+    { x: 0.6, y: 4.0, w: 7.3, h: 0.5, fontSize: 8.7, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11 }
   );
 
   const b100 = DATA.budgets.find((b) => b.budget === 100000);
@@ -731,25 +791,26 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Allocated weekly budget ($)", labels: alloc.map((r) => VTYPE_LABEL[r.venue_type]), values: alloc.map((r) => r.allocated_weekly_budget) },
   ], {
-    x: 0.6, y: 2.5, w: 7.3, h: 3.9,
+    x: 0.6, y: 4.6, w: 7.3, h: 2.35,
     barDir: "col", chartColors: [NAVY], showLegend: false,
-    showValue: true, dataLabelFontSize: 10, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
+    showValue: true, dataLabelFontSize: 9.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     dataLabelFormatCode: "$#,##0",
-    catAxisLabelFontSize: 11, catAxisLabelColor: TEXT_DARK,
-    valAxisLabelFontSize: 9, valAxisLabelColor: TEXT_MUTED, valAxisLabelFormatCode: "$#,##0",
+    catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
+    valAxisLabelFontSize: 8.5, valAxisLabelColor: TEXT_MUTED, valAxisLabelFormatCode: "$#,##0",
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
+    title: "$100,000 weekly budget — DP-optimal allocation", showTitle: true, titleFontSize: 10.5, titleColor: NAVY,
   });
 
-  slide.addText(`$${(100000).toLocaleString()} weekly budget example`, { x: 8.2, y: 2.55, w: 4.5, h: 0.4, fontSize: 13, bold: true, color: NAVY, fontFace: "Cambria" });
+  slide.addText("Gain vs. naive equal-split", { x: 8.2, y: 1.55, w: 4.5, h: 0.35, fontSize: 13, bold: true, color: NAVY, fontFace: "Cambria" });
   DATA.budgets.forEach((b, i) => {
-    const y = 3.05 + i * 1.15;
+    const y = 2.05 + i * 1.15;
     slide.addText(`$${b.budget.toLocaleString()} budget`, { x: 8.2, y, w: 2.0, h: 0.5, fontSize: 12, color: TEXT_DARK, fontFace: "Calibri" });
     slide.addText(`+${b.gain_pct}%`, { x: 10.2, y: y - 0.05, w: 2.5, h: 0.6, fontSize: 20, bold: true, color: AMBER, fontFace: "Calibri" });
     slide.addText("vs. naive equal-split", { x: 8.2, y: y + 0.42, w: 4.5, h: 0.3, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri" });
   });
   slide.addText(
-    "The optimizer's edge is largest when budget is scarce — exactly when allocation decisions matter most.",
-    { x: 8.2, y: 6.55, w: 4.6, h: 0.6, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
+    "The optimizer's edge is largest when budget is scarce — exactly when allocation decisions matter most. (Previous slide: why a greedy walk can lose this edge entirely.)",
+    { x: 8.2, y: 5.55, w: 4.6, h: 0.9, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
   );
 
   addFooter(slide, "Productization — budget allocator");
