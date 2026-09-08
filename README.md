@@ -70,6 +70,13 @@ into the models that scale it across the whole network:
   line with chance alone, consistent with randomization working as designed.
 - **RCT effect recovery**: estimated lift within ~0.4–3.3 units of the injected ground
   truth across all four venue types (see `outputs/tables/rct_effects.csv`).
+- **Does the lift persist after the campaign ends?**: the same treated-vs-holdout
+  contrast, extended week-by-week past the 10-week campaign window. A real, significant
+  tail survives the first 10 weeks after (+2.52, p=0.031 — ~19% of the in-campaign
+  effect), but it's gone by 10–20 weeks out (-1.43, p=0.236) and averages a clean +0.05
+  (p=0.945) across the full 34-week post-campaign panel — no new design or assumption,
+  just the same causal comparison asked a second question
+  (`outputs/tables/rct_post_campaign_decay.csv`).
 - **MMM calibration matters**: the naive, uncalibrated MMM understated true incremental
   lift by **100–165%** for 3 of 4 venue types before RCT calibration
   (`outputs/tables/mmm_params.csv`).
