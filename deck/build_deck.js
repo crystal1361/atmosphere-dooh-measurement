@@ -520,7 +520,7 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Measured lift", labels: sc.map((r) => VTYPE_LABEL[r.venue_type]), values: sc.map((r) => r.estimated_lift) },
   ], {
-    x: 0.6, y: 1.8, w: 7.2, h: 3.0,
+    x: 0.6, y: 1.8, w: 7.2, h: 2.85,
     barDir: "col", chartColors: [NAVY], showLegend: true, legendPos: "b", legendFontSize: 10,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
@@ -531,15 +531,17 @@ function addStepTag(slide, label, color) {
 
   // Below the chart: how the synthetic twin behind each bar is actually built.
   slide.addText("Method: build a synthetic twin, per venue", {
-    x: 0.6, y: 4.85, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+    x: 0.6, y: 4.7, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
-    "For each activated venue: fit non-negative weights (summing to 1) on same-type never-activated donor venues, minimizing pre-period MSE against that venue's own trajectory (the classic Abadie et al. construction) → apply those weights to donors' post-period data as the counterfactual → effect = mean(actual − synthetic) over that venue's own 16-week post-campaign window.",
-    { x: 0.6, y: 5.15, w: 7.2, h: 0.95, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+    "① Donor pool = same-type venues that never ran a campaign (e.g. 31 never-activated bars).\n"
+    + "② Fit non-negative weights, one per donor, summing to 1, that minimize the MSE between the weighted donor blend and this venue's own pre-period traffic (Abadie et al.) — a real blend, typically 5–15 donors get meaningful weight, not one single match.\n"
+    + "③ Apply that same weight vector to the donors' post-period traffic → synthetic counterfactual; effect = mean(actual − synthetic) over the venue's own 16-week post-campaign window.",
+    { x: 0.6, y: 5.0, w: 7.2, h: 1.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12.5 }
   );
   slide.addText(
     "Unlike the RCT, each venue picks its own pre/post split at its own activation week — obs-pool venues self-activate on their own schedule, there's no shared campaign window. Each bar is the mean effect across only that type's good pre-period-fit venues (see right) — poor fits are excluded, not averaged in.",
-    { x: 0.6, y: 6.15, w: 7.2, h: 0.9, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+    { x: 0.6, y: 6.35, w: 7.2, h: 0.75, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
   );
 
   let ty = 1.8;
