@@ -463,11 +463,11 @@ function addStepTag(slide, label, color) {
     x: 0.6, y: 4.95, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
-    "Same 3-step ANCOVA-style delta as the RCT slide — per-venue delta (window avg − pre-period avg) → treated-mean minus holdout-mean → Welch's t-test for SE, CI, p-value — just re-applied to each window here instead of the single week 60–69 window.",
+    "Same 3-step ANCOVA-style delta as the RCT slide — per-venue delta (window avg − pre-period avg) → treated-mean minus holdout-mean → Welch's t-test for SE, CI, p-value — but pooled across all 4 venue types here (not split like the RCT slide), and re-applied to each window instead of the single week 60–69 window.",
     { x: 0.6, y: 5.25, w: 7.2, h: 0.8, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
   );
   slide.addText(
-    `Pooled across all 4 venue types (${DATA.rct_decay_n_treated} treated / ${DATA.rct_decay_n_holdout} holdout, every window) rather than split like the RCT slide: splitting was already thin at ~15–19 venues/arm for one window, and gets noisier once decay effects — smaller than the in-campaign one — are spread across four.`,
+    "Splitting was already thin at ~15–19 venues/arm for one window; spreading that across four venue types and four windows, on top of decay effects that are smaller than the in-campaign lift, would push the noise past what a week-level estimate can resolve.",
     { x: 0.6, y: 6.1, w: 7.2, h: 0.85, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
   );
 
