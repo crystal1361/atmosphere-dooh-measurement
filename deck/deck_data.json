@@ -56,6 +56,9 @@
   "sc": [
     {
       "venue_type": "bar",
+      "n_treated_used": 29,
+      "n_treated_flagged": 4,
+      "n_donors": 31,
       "estimated_lift": 17.96,
       "placebo_p_value": 0.1,
       "avg_pre_period_rmspe": 17.8,
@@ -63,6 +66,9 @@
     },
     {
       "venue_type": "gym",
+      "n_treated_used": 31,
+      "n_treated_flagged": 0,
+      "n_donors": 37,
       "estimated_lift": 9.92,
       "placebo_p_value": 0.05,
       "avg_pre_period_rmspe": 14.4,
@@ -70,6 +76,9 @@
     },
     {
       "venue_type": "restaurant",
+      "n_treated_used": 42,
+      "n_treated_flagged": 4,
+      "n_donors": 19,
       "estimated_lift": 15.46,
       "placebo_p_value": 0.16,
       "avg_pre_period_rmspe": 26.41,
@@ -77,6 +86,9 @@
     },
     {
       "venue_type": "waiting_room",
+      "n_treated_used": 20,
+      "n_treated_flagged": 0,
+      "n_donors": 47,
       "estimated_lift": 6.53,
       "placebo_p_value": 0.11,
       "avg_pre_period_rmspe": 8.32,

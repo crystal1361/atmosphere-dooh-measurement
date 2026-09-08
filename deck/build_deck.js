@@ -520,7 +520,7 @@ function addStepTag(slide, label, color) {
   slide.addChart(pres.ChartType.bar, [
     { name: "Measured lift", labels: sc.map((r) => VTYPE_LABEL[r.venue_type]), values: sc.map((r) => r.estimated_lift) },
   ], {
-    x: 0.6, y: 1.8, w: 7.2, h: 4.1,
+    x: 0.6, y: 1.8, w: 7.2, h: 3.0,
     barDir: "col", chartColors: [NAVY], showLegend: true, legendPos: "b", legendFontSize: 10,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
@@ -529,21 +529,40 @@ function addStepTag(slide, label, color) {
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
   });
 
-  let ty = 1.8;
-  slide.addText("Venue type      Placebo p    Pre-RMSPE", {
-    x: 8.1, y: ty, w: 4.6, h: 0.3, fontSize: 10, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
-  });
-  ty += 0.35;
-  sc.forEach((r) => {
-    slide.addText(
-      `${VTYPE_LABEL[r.venue_type].padEnd(14)} ${r.placebo_p_value.toFixed(3)}        ${r.avg_pre_period_rmspe.toFixed(1)}`,
-      { x: 8.1, y: ty, w: 4.6, h: 0.35, fontSize: 10.5, color: TEXT_DARK, fontFace: "Courier New" }
-    );
-    ty += 0.42;
+  // Below the chart: how the synthetic twin behind each bar is actually built.
+  slide.addText("Method: build a synthetic twin, per venue", {
+    x: 0.6, y: 4.85, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
-    "Two validation checks, since synthetic control has no closed-form standard error: pre-period fit quality (RMSPE — poor fits are flagged and excluded from the aggregate estimate) and an in-space placebo test on every donor venue.",
-    { x: 8.1, y: ty + 0.3, w: 4.6, h: 1.7, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
+    "For each activated venue: fit non-negative weights (summing to 1) on same-type never-activated donor venues, minimizing pre-period MSE against that venue's own trajectory (the classic Abadie et al. construction) → apply those weights to donors' post-period data as the counterfactual → effect = mean(actual − synthetic) over that venue's own 16-week post-campaign window.",
+    { x: 0.6, y: 5.15, w: 7.2, h: 0.95, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+  );
+  slide.addText(
+    "Unlike the RCT, each venue picks its own pre/post split at its own activation week — obs-pool venues self-activate on their own schedule, there's no shared campaign window. Each bar is the mean effect across only that type's good pre-period-fit venues (see right) — poor fits are excluded, not averaged in.",
+    { x: 0.6, y: 6.15, w: 7.2, h: 0.9, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+  );
+
+  let ty = 1.8;
+  slide.addText("Venue type    n(used/flag)  Placebo p   RMSPE", {
+    x: 8.1, y: ty, w: 4.6, h: 0.28, fontSize: 9.5, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
+  });
+  ty += 0.32;
+  sc.forEach((r) => {
+    const nStr = `${r.n_treated_used}/${r.n_treated_flagged}`;
+    slide.addText(
+      `${VTYPE_LABEL[r.venue_type].padEnd(13)} ${nStr.padEnd(13)} ${r.placebo_p_value.toFixed(3).padEnd(11)} ${r.avg_pre_period_rmspe.toFixed(1)}`,
+      { x: 8.1, y: ty, w: 4.6, h: 0.3, fontSize: 9.5, color: TEXT_DARK, fontFace: "Courier New" }
+    );
+    ty += 0.36;
+  });
+  ty += 0.1;
+  slide.addText(
+    "Pre-period RMSPE = √mean((actual − synthetic)²) over each venue's own pre-period weeks — how well the twin matches reality before treatment starts. A venue is flagged (excluded from the bar above) if its RMSPE exceeds 2.5× its type's median — restaurants' high median (26.4) is why 4 of its 46 attempted fits got flagged.",
+    { x: 8.1, y: ty, w: 4.6, h: 1.15, fontSize: 9.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12.5 }
+  );
+  slide.addText(
+    "In-space placebo test — substitutes for a p-value since synthetic control has no closed-form SE: rerun the identical fit on every never-activated donor, pretending each was treated. Placebo p = share of those donor \"fake effects\" at least as extreme as the real one — restaurant's p=0.16 is the weakest signal of the four (its worst-fitting type too); gym's p=0.05 the strongest.",
+    { x: 8.1, y: ty + 1.25, w: 4.6, h: 1.25, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12.5 }
   );
 
   addFooter(slide, "Causal measurement — Synthetic Control");
