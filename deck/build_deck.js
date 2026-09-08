@@ -597,7 +597,7 @@ function addStepTag(slide, label, color) {
     { name: "Naive MMM (uncalibrated)", labels: mmm.map((r) => VTYPE_LABEL[r.venue_type]), values: mmm.map((r) => r.beta_naive) },
     { name: "RCT-calibrated MMM", labels: mmm.map((r) => VTYPE_LABEL[r.venue_type]), values: mmm.map((r) => r.beta_calibrated) },
   ], {
-    x: 0.6, y: 1.75, w: 7.6, h: 4.3,
+    x: 0.6, y: 1.75, w: 7.6, h: 2.5,
     barDir: "col", chartColors: ["A9AFC7", NAVY], showLegend: true, legendPos: "b", legendFontSize: 9.5,
     showValue: true, dataLabelFontSize: 8.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     catAxisLabelFontSize: 10, catAxisLabelColor: TEXT_DARK,
@@ -606,21 +606,56 @@ function addStepTag(slide, label, color) {
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
   });
 
-  let ty = 1.9;
-  slide.addText("Calibration adjustment", { x: 8.5, y: ty, w: 4.2, h: 0.35, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria" });
-  ty += 0.5;
-  mmm.forEach((r) => {
-    const sign = r.calibration_adjustment_pct >= 0 ? "+" : "";
-    slide.addText(VTYPE_LABEL[r.venue_type], { x: 8.5, y: ty, w: 1.9, h: 0.55, fontSize: 12, color: TEXT_DARK, fontFace: "Calibri" });
-    slide.addText(`${sign}${r.calibration_adjustment_pct.toFixed(0)}%`, {
-      x: 10.4, y: ty, w: 2.3, h: 0.55, fontSize: 18, bold: true,
-      color: Math.abs(r.calibration_adjustment_pct) > 50 ? "B8500A" : GOOD_GREEN, fontFace: "Calibri",
-    });
-    ty += 0.65;
+  // Below the chart: how the two bars are actually fit — shape from the aggregate
+  // series, scale pinned by the RCT anchor. Two steps, kept deliberately separate.
+  slide.addText("Method: fit the shape, then pin the scale", {
+    x: 0.6, y: 4.35, w: 7.6, h: 0.26, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
-    "For 3 of 4 venue types, the naive observational fit understated the RCT-calibrated estimate by 100–165% — the kind of gap real MMM practice cites as its core identification problem, and exactly why the RCT anchor matters.",
-    { x: 8.5, y: ty + 0.15, w: 4.2, h: 1.6, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
+    "① Fit shape on the aggregate weekly series (all venues of this type, RCT + observational pooled together): adstock carries exposure forward week to week (adstock_t = freq_t + decay×adstock_{t−1}), then a Hill curve turns that into diminishing returns (sat(x) = x^shape / (x^shape + half^shape)). decay, half, and shape are grid-searched — 7 × 6 × 4 = 168 combinations — picking whichever minimizes squared error against actual weekly traffic (with trend + seasonality controls, plain OLS). This gives β_naive, the raw uncalibrated max-lift.\n"
+    + "② Pin scale only, via the RCT: simulate the RCT's own exposure (6 plays/wk for 10 weeks) through this same fitted decay/saturation curve to get its implied saturation level, then rescale β so the model's predicted lift there matches the RCT's point estimate exactly. decay/half/shape stay exactly as fit in step ① — only β moves.",
+    { x: 0.6, y: 4.63, w: 7.6, h: 1.6, fontSize: 9, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 10.8 }
+  );
+  slide.addText(
+    "Simplified for the demo: a real deployment would add more controls (competitor spend, price/promo, macro trend), validate the shape out-of-time rather than on in-sample SSE alone, and often blend the experiment in as a Bayesian prior rather than a hard rescale.",
+    { x: 0.6, y: 6.28, w: 7.6, h: 0.6, fontSize: 8.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
+  );
+
+  let ty = 1.75;
+  slide.addText("Calibration adjustment", { x: 8.5, y: ty, w: 4.2, h: 0.3, fontSize: 11.5, bold: true, color: NAVY, fontFace: "Cambria" });
+  ty += 0.38;
+  mmm.forEach((r) => {
+    const sign = r.calibration_adjustment_pct >= 0 ? "+" : "";
+    slide.addText(VTYPE_LABEL[r.venue_type], { x: 8.5, y: ty, w: 1.9, h: 0.42, fontSize: 11, color: TEXT_DARK, fontFace: "Calibri" });
+    slide.addText(`${sign}${r.calibration_adjustment_pct.toFixed(0)}%`, {
+      x: 10.4, y: ty, w: 2.3, h: 0.42, fontSize: 15, bold: true,
+      color: Math.abs(r.calibration_adjustment_pct) > 50 ? "B8500A" : GOOD_GREEN, fontFace: "Calibri",
+    });
+    ty += 0.44;
+  });
+  ty += 0.14;
+  slide.addText("Recovery vs. true effect (synthetic ground truth)", {
+    x: 8.5, y: ty, w: 4.2, h: 0.28, fontSize: 10.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  ty += 0.32;
+  slide.addText("Venue type    Naive err   Calib err", {
+    x: 8.5, y: ty, w: 4.2, h: 0.24, fontSize: 8.5, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
+  });
+  ty += 0.26;
+  mmm.forEach((r) => {
+    const naiveErr = r.beta_naive - r.true_max_lift_ground_truth;
+    const calErr = r.beta_calibrated - r.true_max_lift_ground_truth;
+    const fmt = (v) => (v >= 0 ? "+" : "") + v.toFixed(1);
+    slide.addText(
+      `${VTYPE_LABEL[r.venue_type].padEnd(13)} ${fmt(naiveErr).padEnd(11)} ${fmt(calErr)}`,
+      { x: 8.5, y: ty, w: 4.2, h: 0.24, fontSize: 8.5, color: TEXT_DARK, fontFace: "Courier New" }
+    );
+    ty += 0.26;
+  });
+  ty += 0.12;
+  slide.addText(
+    "Every calibrated error is far smaller than its naive error (restaurant: −10.0 → +0.7) — only checkable here because this is synthetic data with a known answer key. In a real deployment there's no such key; that's exactly why the RCT anchor is trusted rather than verified.",
+    { x: 8.5, y: ty, w: 4.2, h: 1.0, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
   );
 
   addFooter(slide, "Media-mix model");
