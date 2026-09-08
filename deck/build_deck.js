@@ -176,7 +176,7 @@ function addFooter(slide, pageLabel) {
     },
     {
       x: 0.6 + cardW + gap, num: "2", title: "How should budget be spent?",
-      body: "Given a fixed weekly budget, how should it split across restaurants, gyms, bars, and waiting rooms — accounting for each venue type's own diminishing-returns curve?\n\nThe media-planning / pricing question advertisers ask before they commit spend.",
+      body: "Given a budget an advertiser has already committed to Atmosphere, how should it split across restaurants, gyms, bars, and waiting rooms — accounting for each venue type's own diminishing-returns curve?\n\nAn allocation Atmosphere optimizes on its own inventory and hands advertisers as part of the media plan — not a cross-channel budget call made elsewhere.",
     },
     {
       x: 0.6 + 2 * (cardW + gap), num: "3", title: "Where's the revenue upside?",
