@@ -138,7 +138,7 @@ function addFooter(slide, pageLabel) {
   });
 
   const rows = [
-    { label: "Synthetic data", body: "Every figure in this project is synthetic, with a known injected ground-truth effect used specifically to validate that each method recovers it before trusting it conceptually. Not a claim about any real company's data." },
+    { label: "Synthetic data", body: "Every figure in this project is synthetic. The focus here is the methodology for solving the problem, not real company data or figures." },
     { label: "Media-effectiveness & rate-card figures", body: "Dwell time, screen count, ad rate card, and similar parameters shown are illustrative demo values, not researched real industry benchmarks. In production: Nielsen OOH, DSP data (e.g. Vistar), or Atmosphere's own play logs and rate card." },
     { label: "Multi-touch attribution — deliberately not built", body: "Atmosphere's ambient-screen model has no individual-level, cross-venue touchpoint log by default. Building MTA would require purchased mobile location/device-matching data — a real but non-default assumption, so it's scoped out rather than forced." },
     { label: "Online-purchase attribution — also out of scope", body: "Every method here measures incremental foot traffic, not downstream online purchases. Tying exposure to e-commerce conversions needs a device-matched exposure-to-transaction panel — a further non-default assumption layered on top of MTA's." },
