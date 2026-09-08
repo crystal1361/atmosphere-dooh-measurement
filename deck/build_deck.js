@@ -442,12 +442,13 @@ function addStepTag(slide, label, color) {
 
   const decay = DATA.rct_decay; // [during_campaign, weeks_0_10_after, weeks_10_20_after, full_post_campaign]
   const decayLabels = ["During campaign", "0–10 wks after", "10–20 wks after", "Full post-campaign"];
+  const decayTableLabels = ["During campaign", "0–10 wks after", "10–20 wks after", "Full post (34wk)"];
   const decayColors = [NAVY, AMBER, "B7BCCB", "B7BCCB"];
 
   slide.addChart(pres.ChartType.bar, [
     { name: "Estimated lift (network-pooled)", labels: decayLabels, values: decay.map((d) => d.estimated_lift) },
   ], {
-    x: 0.6, y: 1.75, w: 7.2, h: 4.1,
+    x: 0.6, y: 1.75, w: 7.2, h: 3.1,
     barDir: "col", chartColors: decayColors, showTitle: false, showLegend: false,
     showValue: true, dataLabelFontSize: 10.5, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
     dataLabelFormatCode: "+0.0;-0.0;0.0",
@@ -457,35 +458,47 @@ function addStepTag(slide, label, color) {
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
   });
 
+  // Below the chart: same estimator as the RCT slide, just re-pointed at later windows.
+  slide.addText("Method: same estimator, later windows", {
+    x: 0.6, y: 4.95, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "Same 3-step ANCOVA-style delta as the RCT slide — per-venue delta (window avg − pre-period avg) → treated-mean minus holdout-mean → Welch's t-test for SE, CI, p-value — just re-applied to each window here instead of the single week 60–69 window.",
+    { x: 0.6, y: 5.25, w: 7.2, h: 0.8, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13 }
+  );
+  slide.addText(
+    `Pooled across all 4 venue types (${DATA.rct_decay_n_treated} treated / ${DATA.rct_decay_n_holdout} holdout, every window) rather than split like the RCT slide: splitting was already thin at ~15–19 venues/arm for one window, and gets noisier once decay effects — smaller than the in-campaign one — are spread across four.`,
+    { x: 0.6, y: 6.1, w: 7.2, h: 0.85, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+  );
+
   let ty = 1.75;
-  slide.addText("Window                  Estimate     SE      p-value", {
+  slide.addText(`n = ${DATA.rct_decay_n_treated} treated / ${DATA.rct_decay_n_holdout} holdout (same venues, every window)`, {
+    x: 8.1, y: ty, w: 4.6, h: 0.26, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
+  });
+  ty += 0.32;
+  slide.addText("Window              95% CI              p-value", {
     x: 8.1, y: ty, w: 4.6, h: 0.3, fontSize: 9.5, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
   });
-  ty += 0.35;
-  const decayRows = [
-    ["During campaign", "+13.26", "1.26", "< 0.001"],
-    ["0–10 wks after", "+2.52", "1.16", "0.031"],
-    ["10–20 wks after", "-1.43", "1.20", "0.236"],
-    ["Full post (34wk)", "+0.05", "0.75", "0.945"],
-  ];
-  decayRows.forEach((r) => {
+  ty += 0.32;
+  decay.forEach((d, i) => {
+    const ciStr = `[${d.ci_low.toFixed(1)}, ${d.ci_high.toFixed(1)}]`;
     slide.addText(
-      `${r[0].padEnd(18)} ${r[1].padStart(7)} ${r[2].padStart(7)}   ${r[3]}`,
-      { x: 8.1, y: ty, w: 4.6, h: 0.32, fontSize: 10.5, color: TEXT_DARK, fontFace: "Courier New" }
+      `${decayTableLabels[i].padEnd(18)} ${ciStr.padEnd(15)} ${pFmt(d.p_value)}`,
+      { x: 8.1, y: ty, w: 4.6, h: 0.32, fontSize: 10, color: TEXT_DARK, fontFace: "Courier New" }
     );
-    ty += 0.38;
+    ty += 0.36;
   });
 
   slide.addText("A small tail, then nothing", {
-    x: 8.1, y: ty + 0.15, w: 4.6, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria",
+    x: 8.1, y: ty + 0.18, w: 4.6, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
     "The first 10 weeks after the campaign ends still show a real, significant tail — about 19% of the in-campaign lift (p=0.031). By 10–20 weeks out it's gone (p=0.236), and averaged across the full 34-week post-campaign panel the effect is a clean +0.05 (p=0.945).",
-    { x: 8.1, y: ty + 0.5, w: 4.6, h: 1.3, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
+    { x: 8.1, y: ty + 0.52, w: 4.6, h: 1.2, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 }
   );
   slide.addText(
     "Practical read: don't plan on meaningful carryover past the campaign's own window — each flight buys its own 10 weeks of impact, not lingering awareness. That argues for cadence, not one-and-done bursts.",
-    { x: 8.1, y: ty + 1.95, w: 4.6, h: 1.0, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
+    { x: 8.1, y: ty + 1.82, w: 4.6, h: 0.95, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 13.5 }
   );
 
   addFooter(slide, "Causal measurement — RCT, post-campaign persistence");
