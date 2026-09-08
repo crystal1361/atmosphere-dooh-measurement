@@ -90,7 +90,7 @@ function addFooter(slide, pageLabel) {
     },
     {
       x: 0.6 + pillarW + pillarGap, title: "Venue-network health",
-      body: "Know which venues are worth more than they're being paid, and which are at risk of leaving — protect and grow the inventory Atmosphere actually sells. (Answers Q3–Q4.)",
+      body: "Know which venues are generating less ad revenue than their audience is worth, and which are at risk of leaving — protect and grow the inventory Atmosphere actually sells. (Answers Q3–Q4.)",
     },
   ];
   pillars.forEach((p) => {
@@ -120,7 +120,7 @@ function addFooter(slide, pageLabel) {
   );
 
   slide.addText(
-    "What follows is one concrete example of applying this approach — a synthetic demo, validated end to end against a known ground truth.",
+    "What follows is one concrete example of applying this approach — a synthetic demo.",
     { x: 0.6, y: 6.68, w: 12.1, h: 0.4, fontSize: 11.5, italic: true, color: AMBER, fontFace: "Calibri" }
   );
   addFooter(slide, "How I'd approach this role");
