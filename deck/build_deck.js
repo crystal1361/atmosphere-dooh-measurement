@@ -392,7 +392,7 @@ function addStepTag(slide, label, color) {
     { x: 0.6, y: 5.0, w: 7.2, h: 1.15, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 }
   );
   slide.addText(
-    "Why delta, not raw post-period levels: venues vary hugely in baseline traffic (see Table 1) — differencing removes that between-venue noise, so 15–19 venues/arm reach significance a raw-level comparison couldn't. Why Welch's, not Student's or z: arms are small and unequal in size, so we don't assume equal variance, and we use the t- (not z-) distribution because that variance is itself estimated from so few venues.",
+    "Why delta, not raw post-period levels: individual venues differ a lot in baseline traffic even within one arm — differencing each against its own pre-period average removes that noise, so 15–19 venues/arm reach significance a raw-level comparison couldn't. Why Welch's, not Student's or z: arms are small and unequal in size, so we don't assume equal variance, and we use the t- (not z-) distribution — for both the p-value and the CI — because that variance is itself estimated from so few venues.",
     { x: 0.6, y: 6.15, w: 7.2, h: 0.85, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
   );
 

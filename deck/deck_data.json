@@ -15,8 +15,8 @@
       "n_treated": 17,
       "n_holdout": 19,
       "estimated_lift": 17.88,
-      "ci_low": 13.28,
-      "ci_high": 22.47,
+      "ci_low": 13.11,
+      "ci_high": 22.65,
       "p_value": 0.0,
       "true_lift_ground_truth": 16.42
     },
@@ -25,8 +25,8 @@
       "n_treated": 15,
       "n_holdout": 17,
       "estimated_lift": 10.32,
-      "ci_low": 5.24,
-      "ci_high": 15.4,
+      "ci_low": 5.0,
+      "ci_high": 15.65,
       "p_value": 0.0,
       "true_lift_ground_truth": 10.31
     },
@@ -35,8 +35,8 @@
       "n_treated": 18,
       "n_holdout": 17,
       "estimated_lift": 16.79,
-      "ci_low": 11.13,
-      "ci_high": 22.44,
+      "ci_low": 10.91,
+      "ci_high": 22.67,
       "p_value": 0.0,
       "true_lift_ground_truth": 13.46
     },
@@ -45,8 +45,8 @@
       "n_treated": 17,
       "n_holdout": 16,
       "estimated_lift": 7.63,
-      "ci_low": 5.06,
-      "ci_high": 10.2,
+      "ci_low": 4.96,
+      "ci_high": 10.31,
       "p_value": 0.0,
       "true_lift_ground_truth": 8.08
     }
