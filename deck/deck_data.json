@@ -12,6 +12,8 @@
   "rct": [
     {
       "venue_type": "bar",
+      "n_treated": 17,
+      "n_holdout": 19,
       "estimated_lift": 17.88,
       "ci_low": 13.28,
       "ci_high": 22.47,
@@ -20,6 +22,8 @@
     },
     {
       "venue_type": "gym",
+      "n_treated": 15,
+      "n_holdout": 17,
       "estimated_lift": 10.32,
       "ci_low": 5.24,
       "ci_high": 15.4,
@@ -28,6 +32,8 @@
     },
     {
       "venue_type": "restaurant",
+      "n_treated": 18,
+      "n_holdout": 17,
       "estimated_lift": 16.79,
       "ci_low": 11.13,
       "ci_high": 22.44,
@@ -36,6 +42,8 @@
     },
     {
       "venue_type": "waiting_room",
+      "n_treated": 17,
+      "n_holdout": 16,
       "estimated_lift": 7.63,
       "ci_low": 5.06,
       "ci_high": 10.2,

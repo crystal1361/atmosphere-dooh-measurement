@@ -370,7 +370,7 @@ function addStepTag(slide, label, color) {
     { name: "Measured lift", labels: rct.map((r) => VTYPE_LABEL[r.venue_type]), values: rct.map((r) => r.estimated_lift) },
   ];
   slide.addChart(pres.ChartType.bar, chartData, {
-    x: 0.6, y: 1.3, w: 7.2, h: 4.1,
+    x: 0.6, y: 1.3, w: 7.2, h: 3.3,
     barDir: "col", chartColors: [NAVY], showTitle: false,
     showLegend: true, legendPos: "b", legendFontSize: 10,
     showValue: true, dataLabelFontSize: 9, dataLabelPosition: "outEnd", dataLabelColor: TEXT_DARK,
@@ -380,16 +380,33 @@ function addStepTag(slide, label, color) {
     catGridLine: { style: "none" }, valGridLine: { color: "E5E5EF", size: 0.75 },
   });
 
-  // right-side detail table (95% CI + p-value)
+  // Below the chart: how each bar was actually computed — the ANCOVA-style delta
+  // estimator and why Welch's t-test, not a pooled-variance t-test or a z-test.
+  slide.addText("Method: ANCOVA-style delta estimator", {
+    x: 0.6, y: 4.7, w: 7.2, h: 0.28, fontSize: 12.5, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText(
+    "① Per-venue delta = campaign-window avg − pre-period avg — nets out that venue's own baseline.\n"
+    + "② Effect = mean(treated deltas) − mean(holdout deltas) — a DiD-style comparison; any trend common to both arms cancels out too.\n"
+    + "③ Welch's t-test on the two delta samples (unequal variance, unequal n) → SE, 95% CI, p-value.",
+    { x: 0.6, y: 5.0, w: 7.2, h: 1.15, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 13.5 }
+  );
+  slide.addText(
+    "Why delta, not raw post-period levels: venues vary hugely in baseline traffic (see Table 1) — differencing removes that between-venue noise, so 15–19 venues/arm reach significance a raw-level comparison couldn't. Why Welch's, not Student's or z: arms are small and unequal in size, so we don't assume equal variance, and we use the t- (not z-) distribution because that variance is itself estimated from so few venues.",
+    { x: 0.6, y: 6.15, w: 7.2, h: 0.85, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12 }
+  );
+
+  // right-side detail table (n per arm + 95% CI + p-value)
   let ty = 1.3;
-  slide.addText("Venue type      95% CI               p-value", {
-    x: 8.1, y: ty, w: 4.6, h: 0.3, fontSize: 10, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
+  slide.addText("Venue type      n (T/H)   95% CI               p-value", {
+    x: 8.1, y: ty, w: 4.6, h: 0.3, fontSize: 9.5, bold: true, color: TEXT_MUTED, fontFace: "Courier New",
   });
   ty += 0.35;
   rct.forEach((r) => {
+    const nStr = `${r.n_treated}/${r.n_holdout}`;
     slide.addText(
-      `${VTYPE_LABEL[r.venue_type].padEnd(14)} [${r.ci_low.toFixed(1)}, ${r.ci_high.toFixed(1)}]   ${pFmt(r.p_value)}`,
-      { x: 8.1, y: ty, w: 4.6, h: 0.35, fontSize: 10.5, color: TEXT_DARK, fontFace: "Courier New" }
+      `${VTYPE_LABEL[r.venue_type].padEnd(14)} ${nStr.padEnd(9)} [${r.ci_low.toFixed(1)}, ${r.ci_high.toFixed(1)}]   ${pFmt(r.p_value)}`,
+      { x: 8.1, y: ty, w: 4.6, h: 0.35, fontSize: 10, color: TEXT_DARK, fontFace: "Courier New" }
     );
     ty += 0.42;
   });
@@ -397,12 +414,12 @@ function addStepTag(slide, label, color) {
     x: 8.1, y: ty + 0.3, w: 4.6, h: 0.3, fontSize: 12, bold: true, color: NAVY, fontFace: "Cambria",
   });
   slide.addText(
-    "16 tests = 4 pre-treatment covariates (baseline traffic level, dwell time, screen count, audience quality) × 4 venue types. Only 2 came back significant at p≤0.05.",
-    { x: 8.1, y: ty + 0.65, w: 4.6, h: 0.85, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
+    "16 t-tests = 4 pre-treatment covariates (baseline traffic level, dwell time, screen count, audience quality) × 4 venue types — a separate check from the 136 RCT venues themselves. Only 2 came back significant at p≤0.05.",
+    { x: 8.1, y: ty + 0.65, w: 4.6, h: 1.0, fontSize: 10.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 14 }
   );
   slide.addText(
-    "If randomization is clean, the count of false positives across 16 independent tests follows Binomial(16, 0.05): mean 0.8, P(≥2) ≈ 19%. Two sits well inside that distribution's main mass — nowhere near a red-flag tail value like 8+. Randomization worked as designed, not assumed.",
-    { x: 8.1, y: ty + 1.55, w: 4.6, h: 1.5, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
+    "If randomization is clean, the count of false positives across 16 independent t-tests follows Binomial(16, 0.05): mean 0.8, P(≥2) ≈ 19%. Two sits well inside that distribution's main mass — nowhere near a red-flag tail value like 8+. Randomization worked as designed, not assumed.",
+    { x: 8.1, y: ty + 1.7, w: 4.6, h: 1.35, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 14 }
   );
 
   addFooter(slide, "Causal measurement — RCT");
