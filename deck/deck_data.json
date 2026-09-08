@@ -3,6 +3,12 @@
   "n_venue_types": 4,
   "balance_sig": 2,
   "balance_total": 16,
+  "rct_decay": [
+    { "window": "during_campaign", "label": "During campaign\n(wk 60–69)", "week_start": 60, "week_end": 69, "estimated_lift": 13.26, "se": 1.26, "p_value": 0.0 },
+    { "window": "weeks_0_10_after", "label": "0–10 wks after\n(wk 70–79)", "week_start": 70, "week_end": 79, "estimated_lift": 2.52, "se": 1.16, "p_value": 0.031 },
+    { "window": "weeks_10_20_after", "label": "10–20 wks after\n(wk 80–89)", "week_start": 80, "week_end": 89, "estimated_lift": -1.43, "se": 1.2, "p_value": 0.236 },
+    { "window": "full_post_campaign", "label": "Full post-campaign\navg (wk 70–103)", "week_start": 70, "week_end": 103, "estimated_lift": 0.05, "se": 0.75, "p_value": 0.945 }
+  ],
   "rct": [
     {
       "venue_type": "bar",
