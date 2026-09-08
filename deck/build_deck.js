@@ -309,27 +309,43 @@ function addStepTag(slide, label, color) {
     { x: 0.6, y: 1.35, w: 12, h: 0.4, fontSize: 15, bold: true, color: AMBER, fontFace: "Calibri" }
   );
 
-  const colX = [0.6, 6.9];
-  const colW = 5.9;
-  slide.addShape(pres.ShapeType.roundRect, { x: colX[0], y: 2.0, w: colW, h: 4.4, rectRadius: 0.1, fill: { color: "F5F7FC" }, line: { type: "none" } });
-  slide.addText("RCT pool", { x: colX[0] + 0.35, y: 2.25, w: colW - 0.7, h: 0.5, fontSize: 17, bold: true, color: NAVY, fontFace: "Cambria" });
-  slide.addText(
-    "Randomly split treated / holdout within venue_type × geo_cluster × traffic-tier strata for a fixed benchmark campaign. This is a real Atmosphere-designed measurement product, not a historical campaign.",
-    { x: colX[0] + 0.35, y: 2.8, w: colW - 0.7, h: 1.5, fontSize: 12.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 17 }
-  );
-  slide.addText("Used to anchor confidence — assignment is verified, not assumed.", {
-    x: colX[0] + 0.35, y: 5.5, w: colW - 0.7, h: 0.8, fontSize: 12, italic: true, color: GOOD_GREEN, fontFace: "Calibri", lineSpacing: 16,
+  // Same 104 weeks, laid out side by side for both pools — which weeks actually carry
+  // ad activity, and for whom, is the thing a reader most often has to ask about twice.
+  const weekRows = [
+    { seg: "0–51\n(52 wks)\nPre-period", rct: "No ads for either arm — establishes each venue's own baseline.", obs: "No ads yet for anyone — identical baseline period." },
+    { seg: "52–59\n(8 wks)", rct: "Still silent — the designed test hasn't launched yet. Unused by the current effect estimate.", obs: "24 of 264 self-activate here — each advertiser's own timing, no coordination." },
+    { seg: "60–69\n(10 wks)\nRCT window", rct: "Treated: fixed 6 plays/wk. Holdout: still 0. The only window the RCT estimate uses.", obs: "37 more self-activate here — overlap with the RCT window is coincidence, not design." },
+    { seg: "70–103\n(34 wks)\nPost-campaign", rct: "Ads stop, but true lift decays out over ~8 more weeks (adstock carryover) — not yet analyzed.", obs: "69 more (the largest group) start only now — most real campaigns land late, spread thin." },
+  ];
+
+  const headerOpts = { bold: true, color: WHITE, fill: { color: NAVY }, fontSize: 11.5, valign: "middle", fontFace: "Calibri" };
+  const tableRows = [
+    [
+      { text: "Weeks", options: { ...headerOpts, align: "center" } },
+      { text: "RCT pool — 136 venues", options: headerOpts },
+      { text: "Observational pool — 264 venues", options: headerOpts },
+    ],
+    ...weekRows.map((r, i) => {
+      const shade = i % 2 === 0 ? "FFFFFF" : "F7F8FC";
+      return [
+        { text: r.seg, options: { bold: true, color: NAVY, fill: { color: shade }, fontSize: 10.5, valign: "middle", fontFace: "Calibri", lineSpacing: 12 } },
+        { text: r.rct, options: { color: TEXT_DARK, fill: { color: "EDF1FB" }, fontSize: 10.5, valign: "middle", fontFace: "Calibri", lineSpacing: 13 } },
+        { text: r.obs, options: { color: TEXT_DARK, fill: { color: "FDF1E3" }, fontSize: 10.5, valign: "middle", fontFace: "Calibri", lineSpacing: 13 } },
+      ];
+    }),
+  ];
+
+  slide.addTable(tableRows, {
+    x: 0.6, y: 2.0, w: 12.13, colW: [2.15, 4.99, 4.99],
+    rowH: [0.42, 0.85, 0.95, 0.95, 0.95],
+    border: { type: "solid", color: "E2E5F0", pt: 0.75 },
+    autoPage: false,
   });
 
-  slide.addShape(pres.ShapeType.roundRect, { x: colX[1], y: 2.0, w: colW, h: 4.4, rectRadius: 0.1, fill: { color: "F5F7FC" }, line: { type: "none" } });
-  slide.addText("Observational pool", { x: colX[1] + 0.35, y: 2.25, w: colW - 0.7, h: 0.5, fontSize: 17, bold: true, color: NAVY, fontFace: "Cambria" });
   slide.addText(
-    "Advertisers activate venues themselves — non-randomly. Higher-baseline-traffic venues are systematically more likely to be activated (a real selection mechanism), and weekly frequency varies venue-to-venue.",
-    { x: colX[1] + 0.35, y: 2.8, w: colW - 0.7, h: 1.5, fontSize: 12.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 17 }
+    "RCT pool: assignment is verified, not assumed — anchors high confidence. Observational pool: 134 of 264 venues never run a campaign at all, and the rest self-activate on their own schedule — exactly why synthetic control (next) reconstructs the counterfactual instead of comparing before/after directly.",
+    { x: 0.6, y: 6.15, w: 12.13, h: 0.75, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
   );
-  slide.addText("A naive before/after comparison here is confounded by selection — this is what synthetic control and the MMM have to work around.", {
-    x: colX[1] + 0.35, y: 5.5, w: colW - 0.7, h: 0.8, fontSize: 12, italic: true, color: "B8500A", fontFace: "Calibri", lineSpacing: 16,
-  });
 
   addFooter(slide, "Data & methodology");
 }
