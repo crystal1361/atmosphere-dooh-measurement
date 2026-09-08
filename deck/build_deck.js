@@ -221,8 +221,11 @@ function addStepTag(slide, label, color) {
 {
   const slide = pres.addSlide();
   slide.background = { color: WHITE };
-  slide.addText("Design: one pipeline, confidence flows from experiment to product", {
+  slide.addText("The roadmap: four problems, one connected pipeline", {
     x: 0.6, y: 0.5, w: 12.2, h: 0.7, fontSize: 26, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  slide.addText("Before the deep dive — this is the shape of what follows.", {
+    x: 0.6, y: 1.2, w: 12, h: 0.4, fontSize: 13, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
   });
 
   const steps = [
@@ -284,55 +287,14 @@ function addStepTag(slide, label, color) {
   });
 
   slide.addText(
-    "Steps 1–2 answer Q1: RCT for randomized campaigns, synthetic control extending coverage to historical, non-randomized ones. Steps 3–4 turn that into Q2: MMM shapes the response curve, the RCT pins its scale, and the allocator solves the exact split. Step 5 answers Q3: the venue-revenue model reuses the calibrated per-exposure lift from steps 1–3 as a feature. Step 6 answers Q4: a separate churn classifier flags at-risk venues, then combines its risk score with step 5's revenue into one value-×-risk priority — one connected system feeding all four answers, not four separate projects bolted together.",
-    { x: 0.7, y: 5.78, w: 11.9, h: 1.15, fontSize: 10.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 13.5 }
+    "One connected system, not four separate projects: the calibrated per-exposure lift from steps 1–4 becomes a feature in the venue-revenue model (step 5), which combines with the churn model's risk score (step 6) into one value-×-risk priority list.",
+    { x: 0.7, y: 5.85, w: 11.9, h: 0.75, fontSize: 11, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 15 }
   );
-  addFooter(slide, "Design overview");
-}
-
-// ---------------------------------------------------------------------------
-// Slide 6 — Roadmap: problem -> method (outline before the deep dive)
-// ---------------------------------------------------------------------------
-{
-  const slide = pres.addSlide();
-  slide.background = { color: WHITE };
-  slide.addText("The roadmap: four problems, four methods", {
-    x: 0.6, y: 0.5, w: 12.2, h: 0.7, fontSize: 28, bold: true, color: NAVY, fontFace: "Cambria",
-  });
-  slide.addText("Before the deep dive — this is the shape of what follows.", {
-    x: 0.6, y: 1.2, w: 12, h: 0.4, fontSize: 13, italic: true, color: TEXT_MUTED, fontFace: "Calibri",
-  });
-
-  const ROADMAP_TINT = { Q1: "E4E9F7", Q2: "FBE8D2", Q3: "E2F1E9", Q4: "F5E3EC" };
-  const roadmap = [
-    { q: "Q1", problem: "Did the campaign actually work?", method: "RCT geo-holdout, extended to historical campaigns with synthetic control." },
-    { q: "Q2", problem: "How should budget be spent?", method: "RCT-calibrated MMM, then an exact DP budget allocator over the calibrated response curves." },
-    { q: "Q3", problem: "Where's the revenue upside?", method: "Gradient-boosted venue-revenue model, honest out-of-fold evaluation." },
-    { q: "Q4", problem: "Which venues are at risk?", method: "Gradient-boosted churn classifier, combined with Q3 into one value × risk priority." },
-  ];
-  const rowY0 = 1.85, rowH = 1.05, rowGap = 0.15, rowW = 12.13, rowStep = rowH + rowGap;
-  roadmap.forEach((r, i) => {
-    const y = rowY0 + i * rowStep;
-    slide.addShape(pres.ShapeType.roundRect, {
-      x: 0.6, y, w: rowW, h: rowH, rectRadius: 0.1, fill: { color: ROADMAP_TINT[r.q] }, line: { type: "none" },
-    });
-    slide.addShape(pres.ShapeType.ellipse, { x: 0.9, y: y + rowH / 2 - 0.3, w: 0.6, h: 0.6, fill: { color: QCOLOR[r.q] } });
-    slide.addText(r.q, {
-      x: 0.9, y: y + rowH / 2 - 0.3, w: 0.6, h: 0.6, fontSize: 15, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri",
-    });
-    slide.addText(r.problem, {
-      x: 1.8, y: y + 0.1, w: 4.5, h: rowH - 0.2, fontSize: 14.5, bold: true, color: QCOLOR[r.q], fontFace: "Cambria", valign: "middle", lineSpacing: 17,
-    });
-    slide.addText(r.method, {
-      x: 6.5, y: y + 0.1, w: 5.9, h: rowH - 0.2, fontSize: 12.5, color: TEXT_DARK, fontFace: "Calibri", valign: "middle", lineSpacing: 16,
-    });
-  });
-
   addFooter(slide, "Roadmap");
 }
 
 // ---------------------------------------------------------------------------
-// Slide 7 — Data & methodology
+// Slide 6 — Data & methodology
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -373,7 +335,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 8 — RCT results
+// Slide 7 — RCT results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -431,7 +393,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 9 — Synthetic control results
+// Slide 8 — Synthetic control results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -476,7 +438,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 10 — MMM calibration (the headline technical story)
+// Slide 9 — MMM calibration (the headline technical story)
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -522,7 +484,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 11 — MMM robustness check: competing media as a confounder
+// Slide 10 — MMM robustness check: competing media as a confounder
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -572,7 +534,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 12 — Budget allocator
+// Slide 11 — Budget allocator
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -616,7 +578,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 13 — The other side of the business
+// Slide 12 — The other side of the business
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -668,7 +630,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 14 — Venue revenue model results
+// Slide 13 — Venue revenue model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -735,7 +697,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 15 — Venue retention model results
+// Slide 14 — Venue retention model results
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
@@ -819,7 +781,7 @@ function addStepTag(slide, label, color) {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 16 — Closing / takeaways
+// Slide 15 — Closing / takeaways
 // ---------------------------------------------------------------------------
 {
   const slide = pres.addSlide();
