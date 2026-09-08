@@ -48,9 +48,6 @@ function addFooter(slide, pageLabel) {
   slide.addText(pageLabel, {
     x: 0.5, y: 7.15, w: 8, h: 0.3, fontSize: 9, color: TEXT_MUTED, fontFace: "Calibri",
   });
-  slide.addText("Synthetic demo — validated against a known injected ground truth", {
-    x: 8.3, y: 7.15, w: 4.5, h: 0.3, fontSize: 9, color: TEXT_MUTED, fontFace: "Calibri", align: "right",
-  });
 }
 
 // Small top-right pill tying a demo slide back to slide 5's numbered pipeline step
