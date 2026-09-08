@@ -107,8 +107,16 @@ def estimate_rct_effects(venues, panel, gt):
         holdout = g[g["rct_arm"] == "holdout"]["delta"].dropna()
         t_stat, p_val = stats.ttest_ind(treated, holdout, equal_var=False)
         effect = treated.mean() - holdout.mean()
-        se = np.sqrt(treated.var(ddof=1) / len(treated) + holdout.var(ddof=1) / len(holdout))
-        ci_lo, ci_hi = effect - 1.96 * se, effect + 1.96 * se
+        v1, v2 = treated.var(ddof=1), holdout.var(ddof=1)
+        n1, n2 = len(treated), len(holdout)
+        se = np.sqrt(v1 / n1 + v2 / n2)
+        # Welch-Satterthwaite df, matching the same unequal-variance t-distribution
+        # that ttest_ind(equal_var=False) already uses for p_val -- a z-based CI
+        # (1.96) would be narrower and inconsistent with that test's own reference
+        # distribution, understating uncertainty at these small, unequal n (15-19/arm).
+        df = (v1 / n1 + v2 / n2) ** 2 / ((v1 / n1) ** 2 / (n1 - 1) + (v2 / n2) ** 2 / (n2 - 1))
+        t_crit = stats.t.ppf(0.975, df)
+        ci_lo, ci_hi = effect - t_crit * se, effect + t_crit * se
 
         true_effect = g[g["rct_arm"] == "treated"]["true_lift_avg"].mean()
 
