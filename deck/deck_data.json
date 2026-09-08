@@ -60,8 +60,8 @@
       "n_treated_flagged": 4,
       "n_donors": 31,
       "estimated_lift": 17.96,
-      "placebo_p_value": 0.1,
-      "avg_pre_period_rmspe": 17.8,
+      "placebo_p_value": 0.0967741935483871,
+      "avg_pre_period_rmspe": 17.80062104083655,
       "true_lift_ground_truth": 15.82
     },
     {
@@ -70,8 +70,8 @@
       "n_treated_flagged": 0,
       "n_donors": 37,
       "estimated_lift": 9.92,
-      "placebo_p_value": 0.05,
-      "avg_pre_period_rmspe": 14.4,
+      "placebo_p_value": 0.05405405405405406,
+      "avg_pre_period_rmspe": 14.399907198163747,
       "true_lift_ground_truth": 9.52
     },
     {
@@ -80,8 +80,8 @@
       "n_treated_flagged": 4,
       "n_donors": 19,
       "estimated_lift": 15.46,
-      "placebo_p_value": 0.16,
-      "avg_pre_period_rmspe": 26.41,
+      "placebo_p_value": 0.15789473684210525,
+      "avg_pre_period_rmspe": 26.412789710571428,
       "true_lift_ground_truth": 12.17
     },
     {
@@ -90,8 +90,8 @@
       "n_treated_flagged": 0,
       "n_donors": 47,
       "estimated_lift": 6.53,
-      "placebo_p_value": 0.11,
-      "avg_pre_period_rmspe": 8.32,
+      "placebo_p_value": 0.10638297872340426,
+      "avg_pre_period_rmspe": 8.316825577136722,
       "true_lift_ground_truth": 7.33
     }
   ],

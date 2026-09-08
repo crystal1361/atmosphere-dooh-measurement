@@ -535,13 +535,13 @@ function addStepTag(slide, label, color) {
   });
   slide.addText(
     "① Donor pool = same-type venues that never ran a campaign (e.g. 31 never-activated bars).\n"
-    + "② Fit non-negative weights, one per donor, summing to 1, that minimize the MSE between the weighted donor blend and this venue's own pre-period traffic (Abadie et al.) — a real blend, typically 5–15 donors get meaningful weight, not one single match.\n"
+    + "② Fit non-negative weights, one per donor, summing to 1, via SLSQP (Sequential Least Squares Programming, scipy.optimize) minimizing the MSE between the weighted donor blend and this venue's own pre-period traffic (Abadie et al.) — a real blend, typically 5–15 donors get meaningful weight, not one single match.\n"
     + "③ Apply that same weight vector to the donors' post-period traffic → synthetic counterfactual; effect = mean(actual − synthetic) over the venue's own 16-week post-campaign window.",
-    { x: 0.6, y: 5.0, w: 7.2, h: 1.3, fontSize: 10, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12.5 }
+    { x: 0.6, y: 5.0, w: 7.2, h: 1.55, fontSize: 9.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12 }
   );
   slide.addText(
-    "Unlike the RCT, each venue picks its own pre/post split at its own activation week — obs-pool venues self-activate on their own schedule, there's no shared campaign window. Each bar is the mean effect across only that type's good pre-period-fit venues (see right) — poor fits are excluded, not averaged in.",
-    { x: 0.6, y: 6.35, w: 7.2, h: 0.75, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
+    "Unlike the RCT, each venue picks its own pre/post split at its own activation week — no shared campaign window. Each bar is the mean effect across only that type's good pre-period-fit venues (see right) — poor fits are excluded, not averaged in.",
+    { x: 0.6, y: 6.6, w: 7.2, h: 0.55, fontSize: 8.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 10.5 }
   );
 
   let ty = 1.8;
@@ -557,14 +557,24 @@ function addStepTag(slide, label, color) {
     );
     ty += 0.36;
   });
-  ty += 0.1;
+  ty += 0.08;
   slide.addText(
-    "Pre-period RMSPE = √mean((actual − synthetic)²) over each venue's own pre-period weeks — how well the twin matches reality before treatment starts. A venue is flagged (excluded from the bar above) if its RMSPE exceeds 2.5× its type's median — restaurants' high median (26.4) is why 4 of its 46 attempted fits got flagged.",
-    { x: 8.1, y: ty, w: 4.6, h: 1.15, fontSize: 9.5, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 12.5 }
+    "Pre-period RMSPE (root mean squared prediction error) = √mean((actual − synthetic)²) over each venue's own pre-period weeks — how well the twin matches reality before treatment starts. Flagged (excluded from the bar) if RMSPE exceeds 2.5× its type's median — restaurants' high median (26.4) is why 4 of its 46 fits got flagged.",
+    { x: 8.1, y: ty, w: 4.6, h: 1.0, fontSize: 9, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 11.5 }
   );
+  ty += 1.08;
   slide.addText(
-    "In-space placebo test — substitutes for a p-value since synthetic control has no closed-form SE: rerun the identical fit on every never-activated donor, pretending each was treated. Placebo p = share of those donor \"fake effects\" at least as extreme as the real one — restaurant's p=0.16 is the weakest signal of the four (its worst-fitting type too); gym's p=0.05 the strongest.",
-    { x: 8.1, y: ty + 1.25, w: 4.6, h: 1.25, fontSize: 9.5, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 12.5 }
+    "In-space placebo test — substitutes for a p-value since synthetic control has no closed-form SE: rerun the identical fit on every never-activated donor, pretending each was treated. Placebo p = share of donor \"fake effects\" at least as extreme as the real one — restaurant's p=0.158 is the weakest signal (its worst-fitting type too); gym's p=0.054 the strongest.",
+    { x: 8.1, y: ty, w: 4.6, h: 1.05, fontSize: 9, italic: true, color: TEXT_MUTED, fontFace: "Calibri", lineSpacing: 11.5 }
+  );
+  ty += 1.15;
+  slide.addText("Consistent with the RCT — not independently significant", {
+    x: 8.1, y: ty, w: 4.6, h: 0.32, fontSize: 11, bold: true, color: NAVY, fontFace: "Cambria",
+  });
+  ty += 0.36;
+  slide.addText(
+    "No type clears p<0.05 alone (gyms closest, 0.054) — but every point estimate lands within ~1.3 of the RCT's own effect for that same type, on a completely different set of venues: real corroboration, just not from this test alone.",
+    { x: 8.1, y: ty, w: 4.6, h: 0.6, fontSize: 9, color: TEXT_DARK, fontFace: "Calibri", lineSpacing: 11 }
   );
 
   addFooter(slide, "Causal measurement — Synthetic Control");
