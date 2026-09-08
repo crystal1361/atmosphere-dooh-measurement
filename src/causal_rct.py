@@ -130,6 +130,54 @@ def estimate_rct_effects(venues, panel, gt):
     return pd.DataFrame(rows)
 
 
+def estimate_post_campaign_decay(venues, panel, gt):
+    """Does the lift persist after the 10-week campaign ends, or does it evaporate?
+    Same treated-vs-holdout contrast used for the headline effect, applied to three
+    windows after the campaign instead of assuming the answer -- no new design, no
+    new assumption, just the same causal comparison extended in time. Pooled across
+    all four venue types (not split by type): splitting drops each arm to ~15-19
+    venues, which is too small for a week-level estimate to clear its own noise."""
+    n_pre = gt["n_weeks_pre"]
+    start_off = gt["rct_campaign_start_week_offset"]
+    n_camp_weeks = gt["rct_campaign_weeks"]
+    camp_lo = n_pre + start_off
+    camp_hi = camp_lo + n_camp_weeks  # exclusive
+
+    rct_venues = venues[venues["pool"] == "rct"][["venue_id", "rct_arm"]].set_index("venue_id")
+    pre = panel[panel["week"] < n_pre].groupby("venue_id")["foot_traffic"].mean().rename("pre_avg")
+    last_week = int(panel["week"].max())
+
+    windows = [
+        ("during_campaign", camp_lo, camp_hi),
+        ("weeks_0_10_after", camp_hi, camp_hi + 10),
+        ("weeks_10_20_after", camp_hi + 10, camp_hi + 20),
+        ("full_post_campaign", camp_hi, last_week + 1),
+    ]
+    rows = []
+    for label, lo, hi in windows:
+        w_avg = panel[(panel["week"] >= lo) & (panel["week"] < hi)].groupby("venue_id")["foot_traffic"].mean().rename("w_avg")
+        joined = rct_venues.join([pre, w_avg])
+        joined["delta"] = joined["w_avg"] - joined["pre_avg"]
+        treated = joined[joined["rct_arm"] == "treated"]["delta"].dropna()
+        holdout = joined[joined["rct_arm"] == "holdout"]["delta"].dropna()
+        effect = treated.mean() - holdout.mean()
+        se = np.sqrt(treated.var(ddof=1) / len(treated) + holdout.var(ddof=1) / len(holdout))
+        t_stat, p_val = stats.ttest_ind(treated, holdout, equal_var=False)
+        rows.append(
+            dict(
+                window=label,
+                week_start=lo,
+                week_end=hi - 1,
+                estimated_lift=effect,
+                se=se,
+                p_value=p_val,
+                n_treated=len(treated),
+                n_holdout=len(holdout),
+            )
+        )
+    return pd.DataFrame(rows)
+
+
 def main():
     venues, panel, gt = load_data()
 
@@ -142,6 +190,12 @@ def main():
     print("\n=== RCT geo-holdout effect estimates (high confidence) ===")
     print(effects[["venue_type", "estimated_lift", "ci_low", "ci_high", "p_value",
                     "true_lift_ground_truth", "recovery_error"]].to_string(index=False))
+
+    decay = estimate_post_campaign_decay(venues, panel, gt)
+    decay.to_csv(os.path.join(OUT_TABLES, "rct_post_campaign_decay.csv"), index=False)
+
+    print("\n=== Does the lift persist after the campaign ends? (same RCT contrast, extended in time) ===")
+    print(decay[["window", "week_start", "week_end", "estimated_lift", "se", "p_value"]].round(3).to_string(index=False))
 
 
 if __name__ == "__main__":
